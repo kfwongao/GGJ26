@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa82c25dcad893f4a8bfa89b60ac9575, type: 3}
+  m_Name: Defence_Senior
+  m_EditorClassIdentifier: 
+  cardName: "\u9AD8\u7EA7\u9632\u5FA1"
+  description: "\u83B7\u5F9712\u70B9\u9632\u5FA1"
+  cardType: 1
+  rarity: 2
+  energyCost: 2
+  attackValue: 0
+  defenceValue: 12
+  strengthValue: 0
+  isExhaust: 0
+  drawCard: 0

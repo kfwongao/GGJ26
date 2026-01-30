@@ -1,0 +1,8 @@
+In this unity project, there is a first version of gameplay excel, MaskMYDramaV1.xlsx
+The game play is come from the launched game 杀戮尖塔. Two screen capture is ref_game_001.jpg and ref_game_002.jpg
+
+Please extract the game play design in MaskMYDramaV1.xlsx, web search 杀戮尖塔 game play and design, reference the ui from the two jpg file.
+Try to prototype a unity game with the features in excel and 杀戮尖塔 . The game theme is Mask.
+
+Please help to implement the above features.
+Please create the prototype using unity c# best practices. create a markdown .md file for the goal, solution, best practices, test plan and points to aware. Review to changes yourself and let me know where is changes and review before apply the code change.
