@@ -14,6 +14,7 @@ namespace MaskMYDrama.Combat
     /// Based on CSV: Enemy attacks player during enemy turn.
     /// Enemy's attack point is dynamically calculated.
     /// </summary>
+    [System.Serializable]
     public class Enemy : CombatEntity
     {
         [Header("Enemy Info")]
@@ -22,10 +23,10 @@ namespace MaskMYDrama.Combat
         
         [Header("Attack Pattern")]
         [Tooltip("Base damage dealt per attack")]
-        public int baseAttackDamage = 10;
+        [SerializeField] public int baseAttackDamage = 10;
         
         [Tooltip("Multiplier for attack damage (for difficulty scaling)")]
-        public int attackMultiplier = 1;
+        [SerializeField] public int attackMultiplier = 1;
         
         /// <summary>
         /// Calculates the attack damage this enemy will deal.

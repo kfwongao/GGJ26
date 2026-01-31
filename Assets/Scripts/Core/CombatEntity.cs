@@ -13,21 +13,22 @@ namespace MaskMYDrama.Core
     /// 
     /// Defence points reset at the start of each turn.
     /// </summary>
+    [System.Serializable]
     public class CombatEntity : MonoBehaviour
     {
         [Header("Stats")]
         [Tooltip("Maximum health points")]
-        public int maxHealth = 100;
+        [SerializeField] public int maxHealth = 100;
         
         [Tooltip("Current health points")]
-        public int currentHealth;
+        [SerializeField] public int currentHealth;
         
         [Tooltip("Defence points accumulated this turn (reduces incoming damage)")]
-        public int currentDefence = 0; // Defence points accumulated this turn
+        [SerializeField] public int currentDefence = 0; // Defence points accumulated this turn
         
         [Header("Combat")]
         [Tooltip("Dynamically calculated attack power (modified by strength cards)")]
-        public int attackPower = 0; // Dynamically calculated attack
+        [SerializeField] public int attackPower = 0; // Dynamically calculated attack
         
         /// <summary>
         /// Initialize health to maximum on awake.

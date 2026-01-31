@@ -14,14 +14,15 @@ namespace MaskMYDrama.Combat
     /// 
     /// Extends CombatEntity to add energy functionality.
     /// </summary>
+    [System.Serializable]
     public class Player : CombatEntity
     {
         [Header("Player Stats")]
         [Tooltip("Current available energy")]
-        public int currentEnergy = 3;
+        [SerializeField] public int currentEnergy = 3;
         
         [Tooltip("Maximum energy per turn (3/4/5 as per CSV)")]
-        public int maxEnergy = 3;
+        [SerializeField] public int maxEnergy = 3;
         
         /// <summary>
         /// Sets energy to a specific value (clamped to 0-maxEnergy).
