@@ -3119,7 +3119,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58c6578f5c9402944a6d70fd2f7e4ca5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 1
+  maxHealth: 7
   currentHealth: 0
   currentDefence: 0
   attackPower: 0
@@ -4870,7 +4870,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f02822ee6d3e59845b0609b1d74d7c38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  maxHealth: 25
   currentHealth: 0
   currentDefence: 0
   attackPower: 0
