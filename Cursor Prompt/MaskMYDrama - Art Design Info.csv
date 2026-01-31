@@ -1,0 +1,50 @@
+美术需求,卡牌类型,,,,,,
+,,功能,在戏剧中的特征,,颜色,,
+卡牌,Attack,让敌人掉血,主角、攻击性、炫耀、高调、吵闹、快乐、自我展示、骄傲、专断、引人注目、吸引眼球、花枝招展、魅力、能歌善舞,,偏明亮耀眼（橙or红,,
+,Defence,给自己加格挡，减少受攻击值,谨慎、不被注意、少言寡语、回避、保守、小心、低调、“老谋深算”,,冷色,,
+,Strength,给攻击和防御叠buff（更易伤、更防御）/帮助回血/帮助用更少的能量打出更高的伤害/,灵活、灵巧、敏捷、善意、魅力、聪慧、少女、可爱的小动作,,,,
+,Function,用一定代价换取更多的利处/使打法更具策略/增加随机性,意外、变身、邪魅、鬼马、搞鬼、幽默、戏精上身、讽刺、搞怪、抢戏、突变风格,,黑？,,
+,,,,,,,
+各类型设计,性质,名称,功能描述,Text on Card,天赋点/Flair（需要消耗的能量数量）,在牌组系统里的数量（for design）,位置初始
+Attack,0级 ,亮相/Stage pose,"受到打击的一名对手将失去5点生命。
+A struck opponent loses 5 health.",,1,3,开局  in card pool
+,1级,Monologue 独白,"受到打击的一名对手将失去7点生命，抽一张牌
+A struck opponent loses 5 health.",,1,1,开局 in card pool
+,1级,Dialogue 对白,"所有对手失去4点生命。
+All struck opponent loses 5 health.",,0,1,开局 in card pool
+,2级,即兴表演//Improvisasion,受到打击的一名对手失去X*4点生命（X=剩余全部天赋点）,,X=all 天赋点,1,Rouguelike Pool
+,2级,高潮/Climax,随机令一名敌人失去20点生命 - 消耗手牌中所有力量牌。,,2,1,Rougulike Pool
+,2级,主角/Protagonist,抽3张牌，下一轮回合对方失去对你造成的同等伤害。,,3,1,Rouguelike Pool
+,2级,多才多艺/Versatile,受到打击的对手失去9点生命，将弃牌堆的一张牌放回手牌，此张牌的天赋点变为0,,2,1,Rougulike Pool
+Defence,0级,屏障/Block,"获得4点屏障保护。
+Gain 4 Barrier.",,1,4,开局  in card pool
+,1级,暗场/Fade out,获得6点屏障保护，指定的一名敌人获得20%增伤，抽一张牌。,,1,1,开局  in card pool
+,1级,停顿/Stop,获得8点屏障，随机消耗一张手牌,,2,1,开局  in card pool
+,2级,横穿舞台/Cross,本轮结束后，下一轮你将获得和对敌人伤害同等数值的格挡,,0,1,Rouguelike Pool
+Strength,0级,潜台词Subtext,"将随机2张攻击牌放入你的手牌
+Add 2 copies of Level 0 Attack to your hand. ",,0,2,开局  in card pool
+,1级,情感记忆/Emotional Memory,将弃牌堆所有牌放入卡池并洗牌，抽2张牌,,0,1,开局  in card pool
+,1级,讽刺/Irony,你向所有敌人施加了30%增伤，并使敌人对你本轮减伤50%,,0,1,开局  in card pool
+,2级,提示词/Cue,获得本轮所有伤害同等值的屏障，并恢复15点生命,对方忘词了,2,1,Rouguelike Pool
+Function,/,笑场/Corpsing,对所有敌人造成13点伤害，一次性使用。,,0,1,Rouguelike Pool
+,/,抢戏/Upstaging,抽三张牌。你每使用一次这张牌，需消耗的天赋点-1.,,3,1,Rouguelike Pool
+,/,魅惑,本轮中对方将等值伤害随机攻击同伴或自己。,,1,1,Rouguelike Pool
+,/,煽情,抽三张牌，这三张牌的天赋点变为0.消耗所有手牌。,,2,1,Rouguelike Pool
+,/,假戏真做,造成你卡池中剩余卡牌数量2倍的伤害，获得4点屏障,,2,1,Rouguelike Pool
+,/,剧透/Spoiled Alert,损失5点生命，打出剩余生命值的伤害给生命最少的敌人，获得12点屏障。,,3,1,Rouguelike Pool
+,/,反派/Antagonist,获得最大35生命，本轮减伤30%。消耗手牌中所有功能牌。,,2,1,Rouguelike Pool
+,,,,,,,
+被动触发,在X轮内无伤并杀死一名敌人，触发观众安可牌,安可/Encore,"
+随机抽1张Roguelike pool card into card pool到卡池。
+重洗卡池所有牌。
+复制一张弃牌堆到卡池 - 可以打开弃牌包",,/,/,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+Level Design,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,Level1/2/3,,,,,,

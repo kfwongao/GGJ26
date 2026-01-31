@@ -293,23 +293,36 @@ namespace MaskMYDrama.UI
         public void OnPointerDown(PointerEventData eventData)
         {
             // Mobile touch support: handle press down
+            // Only allow selection if card is playable and not already selected
+            // Also check if another card is already selected (prevent multiple selections)
             if (isPlayable && !isSelected)
             {
                 isPressed = true;
                 SelectCard();
-                // Notify that this card was selected
+                // Notify that this card was selected (this will deselect other cards)
                 OnCardSelected?.Invoke(handIndex);
+            }
+            else if (!isPlayable)
+            {
+                // If card is not playable, don't allow interaction
+                isPressed = false;
             }
         }
         
         public void OnPointerUp(PointerEventData eventData)
         {
             // Mobile touch support: handle release
-            if (isPressed && !isDragging)
+            // Only process if this card was actually pressed and is not being dragged
+            if (isPressed && !isDragging && isSelected)
             {
                 isPressed = false;
                 // If not dragged, just deselect (don't play card)
                 DeselectCard();
+            }
+            else if (!isSelected)
+            {
+                // If card is not selected, make sure pressed state is cleared
+                isPressed = false;
             }
         }
         
@@ -322,7 +335,8 @@ namespace MaskMYDrama.UI
         
         public void OnDrag(PointerEventData eventData)
         {
-            if (!isSelected || !isPlayable) return;
+            // Only allow dragging if this card is selected, playable, and was pressed
+            if (!isSelected || !isPlayable || !isPressed) return;
             
             isDragging = true;
             
@@ -349,7 +363,8 @@ namespace MaskMYDrama.UI
         
         public void OnEndDrag(PointerEventData eventData)
         {
-            if (!isDragging) return;
+            // Only process if this card was actually being dragged and is selected
+            if (!isDragging || !isSelected) return;
             
             isDragging = false;
             isPressed = false;
@@ -358,7 +373,11 @@ namespace MaskMYDrama.UI
             if (IsCardAboveScreenCenter())
             {
                 // Card is above center - play it
-                OnCardClicked?.Invoke(handIndex);
+                // Only invoke if this card is actually selected
+                if (isSelected)
+                {
+                    OnCardClicked?.Invoke(handIndex);
+                }
             }
             else
             {

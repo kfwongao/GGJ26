@@ -21,4 +21,8 @@ MonoBehaviour:
   defenceValue: 8
   strengthValue: 0
   isExhaust: 0
-  drawCard: 0
+  drawCardCount: 0
+  poolType: 0
+  cardEffect: {fileID: 0}
+  useAdvancedEffects: 0
+  image: {fileID: 0}

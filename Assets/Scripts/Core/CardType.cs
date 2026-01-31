@@ -29,5 +29,15 @@ namespace MaskMYDrama.Core
         Junior,  // 1 energy
         Senior   // 2-3 energy
     }
+    
+    /// <summary>
+    /// Defines which card pool a card belongs to.
+    /// Based on CSV: "开局 in card pool" vs "Rouguelike Pool"
+    /// </summary>
+    public enum CardPoolType
+    {
+        StartingPool,    // 开局 in card pool - cards that start in the deck
+        RoguelikePool    // Rouguelike Pool - cards that can be added through roguelike selection
+    }
 }
 

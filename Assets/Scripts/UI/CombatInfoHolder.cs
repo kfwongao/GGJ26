@@ -15,13 +15,13 @@ public class CombatInfoHolder : MonoBehaviour
             Debug.LogError("CombatInfoHolder : infoText == null");
     }
 
-    public void Init(string value, Color color)
+    public void Init(string value, Color color, int direction = 1) // direction == 1 : up, -1: down
     {
         infoText.color = color;
         infoText.text = $"{value}";
 
         infoText.DOFade(1f, 0.1f);
-        transform.DOLocalMoveY(400, 2f);
+        transform.DOLocalMoveY(400 * direction, 2f);
         infoText.DOFade(0.05f, 0.5f);
     }
 

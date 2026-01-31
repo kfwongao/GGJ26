@@ -1,5 +1,6 @@
 using UnityEngine;
 using MaskMYDrama.Core;
+using MaskMYDrama.Effects;
 using UnityEngine.UI;
 
 namespace MaskMYDrama.Cards
@@ -52,8 +53,19 @@ namespace MaskMYDrama.Cards
         [Tooltip("If true, card is permanently removed after use (not sent to abandoned pile)")]
         public bool isExhaust; // Card is removed after use
         
-        [Tooltip("If true, playing this card draws an additional card")]
-        public bool drawCard; // Draw additional card when played
+        [Tooltip("Number of cards to draw when this card is played (0 = no draw)")]
+        public int drawCardCount = 0; // Number of cards to draw when played
+        
+        [Header("Card Pool")]
+        [Tooltip("Which pool this card belongs to: StartingPool or RoguelikePool")]
+        public CardPoolType poolType = CardPoolType.StartingPool;
+        
+        [Header("Advanced Effects (Version 2.0)")]
+        [Tooltip("Optional: Card effect configuration for complex effects. If set, this overrides simple attackValue/defenceValue.")]
+        public CardEffect cardEffect;
+        
+        [Tooltip("If true, use cardEffect instead of legacy attackValue/defenceValue system")]
+        public bool useAdvancedEffects = false;
 
         [Header("Card Image")]
         [Tooltip("The Image Sprite of that card")]

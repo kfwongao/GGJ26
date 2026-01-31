@@ -1,6 +1,8 @@
 using MaskMYDrama.Cards;
 using MaskMYDrama.Combat;
 using MaskMYDrama.Core;
+using MaskMYDrama.Effects;
+using MaskMYDrama.UI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -45,6 +47,11 @@ namespace MaskMYDrama.Core
         
         [Header("Managers")]
         public DeckManager deckManager;
+        public CardEffectExecutor effectExecutor;
+        
+        [Header("Roguelike Selection")]
+        [Tooltip("Card selection UI for roguelike card selection between levels")]
+        public CardSelectionUI cardSelectionUI;
         
         private CombatState currentState = CombatState.PlayerTurn;
         
@@ -78,6 +85,25 @@ namespace MaskMYDrama.Core
             ObjectPool = new Dictionary<string, List<GameObject>>();
             go_next_level.gameObject.SetActive(false);
             re_try_current.gameObject.SetActive(false);
+            
+            // Initialize effect executor if not assigned
+            if (effectExecutor == null)
+            {
+                effectExecutor = GetComponent<CardEffectExecutor>();
+                if (effectExecutor == null)
+                {
+                    effectExecutor = gameObject.AddComponent<CardEffectExecutor>();
+                }
+            }
+            
+            // Setup effect executor references
+            if (effectExecutor != null)
+            {
+                effectExecutor.player = player;
+                effectExecutor.enemy = enemy;
+                effectExecutor.deckManager = deckManager;
+            }
+            
             StartCombat();
         }
         
@@ -118,8 +144,22 @@ namespace MaskMYDrama.Core
             // Consume energy
             player.ConsumeEnergy(playedCard.GetEnergyCost());
             
-            // Apply card effects
+            // Apply card effects (this may trigger draw card effects)
             ApplyCardEffects(playedCard);
+            
+            // Handle draw card effects (similar to Slay the Spire)
+            if (playedCard.cardData.drawCardCount > 0)
+            {
+                int cardsDrawn = deckManager.DrawCards(playedCard.cardData.drawCardCount);
+                if (cardsDrawn > 0)
+                {
+                    // Create visual feedback for drawing cards
+                    CombatInfoHolder drawInfo = Instantiate(combatInfoHolder, CombatInfoPool.transform);
+                    drawInfo.Init($"Drew {cardsDrawn} card(s)!", Color.cyan, -1); // msg goes down
+                    
+                    // Notify UI to update hand display (will be handled by CombatUI update)
+                }
+            }
             
             // Check if player can still play cards
             if (!CanPlayerPlayAnyCard())
@@ -133,6 +173,23 @@ namespace MaskMYDrama.Core
         
         private void ApplyCardEffects(CardInstance card)
         {
+            // Version 2.0: Try advanced effect system first
+            if (card.cardData.useAdvancedEffects && card.cardData.cardEffect != null && effectExecutor != null)
+            {
+                bool effectApplied = effectExecutor.ExecuteEffects(card.cardData.cardEffect, card);
+                if (effectApplied)
+                {
+                    // Show card name feedback
+                    CombatInfoHolder cardNameFeedback = Instantiate(combatInfoHolder, CombatInfoPool.transform);
+                    cardNameFeedback.Init($"Using {card.cardData.cardName}...", Color.white);
+                    
+                    // Check win condition after effect
+                    CheckWinCondition();
+                    return;
+                }
+            }
+            
+            // Fallback to legacy system for backward compatibility
             switch (card.cardData.cardType)
             {
                 case CardType.Attack:
@@ -175,19 +232,18 @@ namespace MaskMYDrama.Core
                     break;
                     
                 case CardType.Function:
-                    // Special function cards
-                    if (card.cardData.drawCard)
-                    {
-                        // Draw additional card (simplified - would need proper implementation)
-                        // animation vfx
-
-                        CombatInfoHolder drawCardName = Instantiate(combatInfoHolder, CombatInfoPool.transform);
-                        drawCardName.Init($"Using {card.cardData.cardName}...", Color.white);
-                    }
+                    // Special function cards - draw card effects are handled after ApplyCardEffects
+                    CombatInfoHolder functionCardName = Instantiate(combatInfoHolder, CombatInfoPool.transform);
+                    functionCardName.Init($"Using {card.cardData.cardName}...", Color.white);
                     break;
             }
             
             // Check win condition
+            CheckWinCondition();
+        }
+        
+        private void CheckWinCondition()
+        {
             if (!enemy.IsAlive())
             {
                 EndCombatInfoHolder playerIsNotAlive = Instantiate(endCombatInfoHolder, CombatInfoPool.transform);
@@ -203,10 +259,63 @@ namespace MaskMYDrama.Core
             }
         }
 
+        /// <summary>
+        /// Version 2.0: Go to next level with roguelike card selection.
+        /// Shows card selection UI, player picks one card, then proceeds to next level.
+        /// </summary>
         public void Go_Next_Level()
         {
-
-
+            // Hide the button first
+            go_next_level.gameObject.SetActive(false);
+            
+            // Show roguelike card selection
+            if (cardSelectionUI != null)
+            {
+                // Subscribe to selection event
+                cardSelectionUI.OnCardSelected += OnRoguelikeCardSelected;
+                cardSelectionUI.ShowCardSelection();
+            }
+            else
+            {
+                // Fallback: if no card selection UI, go directly to next level
+                Debug.LogWarning("CardSelectionUI not assigned, proceeding directly to next level");
+                ProceedToNextLevel();
+            }
+        }
+        
+        /// <summary>
+        /// Called when player selects a card from roguelike selection.
+        /// </summary>
+        private void OnRoguelikeCardSelected(Card selectedCard)
+        {
+            if (selectedCard != null && deckManager != null)
+            {
+                // Add selected card to pool
+                deckManager.AddCardToPool(selectedCard);
+                
+                // Show feedback
+                if (CombatInfoPool != null && combatInfoHolder != null)
+                {
+                    CombatInfoHolder feedback = Instantiate(combatInfoHolder, CombatInfoPool.transform);
+                    feedback.Init($"Added {selectedCard.cardName} to deck!", Color.green);
+                }
+            }
+            
+            // Unsubscribe from event
+            if (cardSelectionUI != null)
+            {
+                cardSelectionUI.OnCardSelected -= OnRoguelikeCardSelected;
+            }
+            
+            // Proceed to next level
+            ProceedToNextLevel();
+        }
+        
+        /// <summary>
+        /// Proceeds to the next level (original logic).
+        /// </summary>
+        private void ProceedToNextLevel()
+        {
             string[] splitStr = MapsDataSingleton.Instance.MapName.Split('_');
             if (splitStr.Length > 1)
             {

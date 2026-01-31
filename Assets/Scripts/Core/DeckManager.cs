@@ -43,7 +43,12 @@ namespace MaskMYDrama.Core
         private List<CardInstance> abandonedPile = new List<CardInstance>(); // Used cards
         
         [Header("Starting Cards")]
+        [Tooltip("Starting cards (can be set directly or via CardDatabase)")]
         public Card[] startingCards;
+        
+        [Header("Card Database")]
+        [Tooltip("Card database for roguelike selection and starting cards")]
+        public CardDatabase cardDatabase;
         
         public int HandCount => hand.Count;
         public int PoolCount => cardPool.Count;
@@ -62,26 +67,37 @@ namespace MaskMYDrama.Core
             hand.Clear();
             abandonedPile.Clear();
             
-            // Add starting cards
-            if (startingCards != null && startingCards.Length > 0)
+            // Get starting cards from CardDatabase if available, otherwise use startingCards array
+            List<Card> cardsToAdd = new List<Card>();
+            
+            if (cardDatabase != null)
             {
-                foreach (var card in startingCards)
+                // Use CardDatabase to get starting cards
+                cardsToAdd = cardDatabase.GetStartingCards();
+            }
+            else if (startingCards != null && startingCards.Length > 0)
+            {
+                // Fallback to startingCards array
+                cardsToAdd = new List<Card>(startingCards);
+            }
+            
+            // Add starting cards to pool
+            foreach (var card in cardsToAdd)
+            {
+                if (card != null && card.poolType == CardPoolType.StartingPool)
                 {
-                    if (card != null)
-                    {
-                        cardPool.Add(new CardInstance(card));
-                    }
+                    cardPool.Add(new CardInstance(card));
                 }
             }
             
             // Ensure we have at least initialCardCount cards
-            while (cardPool.Count < initialCardCount && startingCards != null && startingCards.Length > 0)
+            while (cardPool.Count < initialCardCount && cardsToAdd.Count > 0)
             {
                 // Duplicate some basic cards if needed
-                foreach (var card in startingCards)
+                foreach (var card in cardsToAdd)
                 {
                     if (cardPool.Count >= initialCardCount) break;
-                    if (card != null)
+                    if (card != null && card.poolType == CardPoolType.StartingPool)
                     {
                         cardPool.Add(new CardInstance(card));
                     }
@@ -105,27 +121,48 @@ namespace MaskMYDrama.Core
         
         /// <summary>
         /// Draw 5 cards into hand (designed + randomly)
+        /// Similar to Slay the Spire: Draw cards from pool to hand
         /// </summary>
         public void DrawHand()
         {
             hand.Clear();
             
-            // If pool is empty, reshuffle abandoned pile into pool
-            if (cardPool.Count == 0)
-            {
-                ReshuffleAbandonedPile();
-            }
+            // Draw 5 cards
+            DrawCards(5);
+        }
+        
+        /// <summary>
+        /// Draw a specific number of cards from pool to hand.
+        /// Similar to Slay the Spire draw card logic.
+        /// </summary>
+        /// <param name="count">Number of cards to draw</param>
+        /// <returns>Number of cards actually drawn</returns>
+        public int DrawCards(int count)
+        {
+            int cardsDrawn = 0;
             
-            // Draw up to 5 cards
-            int cardsToDraw = Mathf.Min(5, cardPool.Count);
-            for (int i = 0; i < cardsToDraw; i++)
+            for (int i = 0; i < count; i++)
             {
+                // If pool is empty, reshuffle abandoned pile into pool
+                if (cardPool.Count == 0)
+                {
+                    ReshuffleAbandonedPile();
+                    
+                    // If still empty after reshuffle, can't draw more
+                    if (cardPool.Count == 0)
+                        break;
+                }
+                
+                // Draw one card from pool to hand
                 if (cardPool.Count > 0)
                 {
                     hand.Add(cardPool[0]);
                     cardPool.RemoveAt(0);
+                    cardsDrawn++;
                 }
             }
+            
+            return cardsDrawn;
         }
         
         /// <summary>
@@ -190,6 +227,22 @@ namespace MaskMYDrama.Core
             // This would typically come from a card database
             // For now, return placeholder - will be implemented with card database
             return new List<Card>();
+        }
+        
+        /// <summary>
+        /// Get current hand size (for UI display)
+        /// </summary>
+        public int GetHandSize()
+        {
+            return hand.Count;
+        }
+        
+        /// <summary>
+        /// Get maximum hand size (typically 5, but can be modified by effects)
+        /// </summary>
+        public int GetMaxHandSize()
+        {
+            return 5; // Default hand size as per CSV
         }
     }
 }

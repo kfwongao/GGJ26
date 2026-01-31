@@ -38,8 +38,14 @@ namespace MaskMYDrama.Editor
             CreateCardHand(canvasObj);
             CreateBottomBar(canvasObj);
             
+            // Create Card Selection UI (Version 2.0)
+            CreateCardSelectionUI(canvasObj);
+            
             // Create Card UI Prefab
             CreateCardUIPrefab();
+            
+            // Create Card Option Prefab (for selection UI)
+            CreateCardOptionPrefab();
             
             // Create Managers
             CreateManagers();
@@ -48,6 +54,22 @@ namespace MaskMYDrama.Editor
             LinkReferences(combatUI);
             
             Debug.Log("Combat UI setup complete! Remember to assign card prefab and starting cards.");
+            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+        }
+        
+        [MenuItem("MaskMYDrama/Setup Card Selection UI Only")]
+        public static void SetupCardSelectionUIOnly()
+        {
+            GameObject canvasObj = GameObject.Find("Canvas");
+            if (canvasObj == null)
+            {
+                canvasObj = CreateCanvas();
+            }
+            
+            CreateCardSelectionUI(canvasObj);
+            CreateCardOptionPrefab();
+            
+            Debug.Log("Card Selection UI setup complete!");
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
         }
         
@@ -78,6 +100,47 @@ namespace MaskMYDrama.Editor
                 GameObject eventSystem = new GameObject("EventSystem");
                 eventSystem.AddComponent<UnityEngine.EventSystems.EventSystem>();
                 eventSystem.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+            }
+        }
+        
+        /// <summary>
+        /// Assigns Noto Sans SC font to TextMeshPro components for Chinese character support.
+        /// 为 TextMeshPro 组件分配 Noto Sans SC 字体以支持简体中文。
+        /// </summary>
+        private static void AssignNotoSansSCFont(TextMeshProUGUI tmpComponent)
+        {
+            if (tmpComponent == null) return;
+            
+            // Try to find Noto Sans SC font
+            string[] fontGuids = AssetDatabase.FindAssets("NotoSansSC-VariableFont_wght SDF");
+            if (fontGuids.Length > 0)
+            {
+                string fontPath = AssetDatabase.GUIDToAssetPath(fontGuids[0]);
+                TMP_FontAsset notoSansFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(fontPath);
+                if (notoSansFont != null)
+                {
+                    tmpComponent.font = notoSansFont;
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Assigns Noto Sans SC font to TextMeshPro (3D) components.
+        /// </summary>
+        private static void AssignNotoSansSCFont(TextMeshPro tmpComponent)
+        {
+            if (tmpComponent == null) return;
+            
+            // Try to find Noto Sans SC font
+            string[] fontGuids = AssetDatabase.FindAssets("NotoSansSC-VariableFont_wght SDF");
+            if (fontGuids.Length > 0)
+            {
+                string fontPath = AssetDatabase.GUIDToAssetPath(fontGuids[0]);
+                TMP_FontAsset notoSansFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(fontPath);
+                if (notoSansFont != null)
+                {
+                    tmpComponent.font = notoSansFont;
+                }
             }
         }
         
@@ -125,6 +188,7 @@ namespace MaskMYDrama.Editor
             playerNameText.text = "Player";
             playerNameText.fontSize = 24;
             playerNameText.color = Color.white;
+            AssignNotoSansSCFont(playerNameText);
             playerName.name = "PlayerNameText";
             
             // Level Text
@@ -139,6 +203,7 @@ namespace MaskMYDrama.Editor
             levelText.text = "Level 1";
             levelText.fontSize = 18;
             levelText.color = Color.white;
+            AssignNotoSansSCFont(levelText);
             level.name = "LevelText";
             
             // Health Bar (Right side of top bar)
@@ -208,6 +273,7 @@ namespace MaskMYDrama.Editor
             healthTextComp.fontSize = 20;
             healthTextComp.color = Color.white;
             healthTextComp.alignment = TextAlignmentOptions.Center;
+            AssignNotoSansSCFont(healthTextComp);
             
             // Add HealthBar component
             HealthBar healthBar = healthContainer.AddComponent<HealthBar>();
@@ -338,6 +404,7 @@ namespace MaskMYDrama.Editor
             enemyHealthTextComp.fontSize = 18;
             enemyHealthTextComp.color = Color.white;
             enemyHealthTextComp.alignment = TextAlignmentOptions.Center;
+            AssignNotoSansSCFont(enemyHealthTextComp);
             
             // Add HealthBar component
             HealthBar enemyHealthBar = enemyHealthContainer.AddComponent<HealthBar>();
@@ -405,6 +472,7 @@ namespace MaskMYDrama.Editor
             energyTextComp.fontSize = 32;
             energyTextComp.color = Color.cyan;
             energyTextComp.alignment = TextAlignmentOptions.Center;
+            AssignNotoSansSCFont(energyTextComp);
             
             EnergyDisplay energyDisplay = energyContainer.AddComponent<EnergyDisplay>();
             energyDisplay.energyText = energyTextComp;
@@ -430,6 +498,7 @@ namespace MaskMYDrama.Editor
             poolCountText.text = "Pool: 12";
             poolCountText.fontSize = 18;
             poolCountText.color = Color.white;
+            AssignNotoSansSCFont(poolCountText);
             
             // Abandoned Count
             GameObject abandonedCount = new GameObject("AbandonedCount");
@@ -438,6 +507,7 @@ namespace MaskMYDrama.Editor
             abandonedCountText.text = "Abandoned: 0";
             abandonedCountText.fontSize = 18;
             abandonedCountText.color = Color.white;
+            AssignNotoSansSCFont(abandonedCountText);
             
             // End Turn Button (Right)
             GameObject endTurnButton = new GameObject("EndTurnButton");
@@ -467,6 +537,7 @@ namespace MaskMYDrama.Editor
             buttonTextComp.fontSize = 24;
             buttonTextComp.color = Color.white;
             buttonTextComp.alignment = TextAlignmentOptions.Center;
+            AssignNotoSansSCFont(buttonTextComp);
         }
         
         private static void CreateCardUIPrefab()
@@ -493,6 +564,8 @@ namespace MaskMYDrama.Editor
             nameText.fontSize = 20;
             nameText.color = Color.black;
             nameText.fontStyle = FontStyles.Bold;
+            // Assign Noto Sans SC font for Chinese support
+            AssignNotoSansSCFont(nameText);
             
             // Card Description
             GameObject cardDesc = new GameObject("CardDescription");
@@ -507,6 +580,7 @@ namespace MaskMYDrama.Editor
             descText.fontSize = 14;
             descText.color = Color.black;
             descText.alignment = TextAlignmentOptions.TopLeft;
+            AssignNotoSansSCFont(descText);
             
             // Energy Cost (Top Right)
             GameObject energyCost = new GameObject("EnergyCost");
@@ -522,6 +596,7 @@ namespace MaskMYDrama.Editor
             energyText.color = Color.yellow;
             energyText.alignment = TextAlignmentOptions.Center;
             energyText.fontStyle = FontStyles.Bold;
+            AssignNotoSansSCFont(energyText);
             
             // Add CardUI component
             CardUI cardUI = cardPrefab.AddComponent<CardUI>();
@@ -610,6 +685,242 @@ namespace MaskMYDrama.Editor
                 combatUIComp.combatManager.enemy = combatUIComp.enemy;
                 combatUIComp.combatManager.deckManager = combatUIComp.deckManager;
             }
+        }
+        
+        /// <summary>
+        /// Creates the Card Selection UI for roguelike card selection (Version 2.0)
+        /// </summary>
+        private static void CreateCardSelectionUI(GameObject parent)
+        {
+            // Main Selection Panel
+            GameObject selectionPanel = new GameObject("CardSelectionPanel");
+            selectionPanel.transform.SetParent(parent.transform, false);
+            RectTransform panelRect = selectionPanel.AddComponent<RectTransform>();
+            panelRect.anchorMin = Vector2.zero;
+            panelRect.anchorMax = Vector2.one;
+            panelRect.offsetMin = Vector2.zero;
+            panelRect.offsetMax = Vector2.zero;
+            
+            // Background Overlay
+            GameObject backgroundOverlay = new GameObject("BackgroundOverlay");
+            backgroundOverlay.transform.SetParent(selectionPanel.transform, false);
+            RectTransform overlayRect = backgroundOverlay.AddComponent<RectTransform>();
+            overlayRect.anchorMin = Vector2.zero;
+            overlayRect.anchorMax = Vector2.one;
+            overlayRect.offsetMin = Vector2.zero;
+            overlayRect.offsetMax = Vector2.zero;
+            Image overlayImage = backgroundOverlay.AddComponent<Image>();
+            overlayImage.color = new Color(0, 0, 0, 0.7f);
+            
+            // Main Content Container
+            GameObject contentContainer = new GameObject("ContentContainer");
+            contentContainer.transform.SetParent(selectionPanel.transform, false);
+            RectTransform contentRect = contentContainer.AddComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0.5f, 0.5f);
+            contentRect.anchorMax = new Vector2(0.5f, 0.5f);
+            contentRect.pivot = new Vector2(0.5f, 0.5f);
+            contentRect.sizeDelta = new Vector2(1400, 600);
+            contentRect.anchoredPosition = Vector2.zero;
+            
+            // Title Text
+            GameObject titleObj = new GameObject("TitleText");
+            titleObj.transform.SetParent(contentContainer.transform, false);
+            RectTransform titleRect = titleObj.AddComponent<RectTransform>();
+            titleRect.anchorMin = new Vector2(0.5f, 1f);
+            titleRect.anchorMax = new Vector2(0.5f, 1f);
+            titleRect.pivot = new Vector2(0.5f, 1f);
+            titleRect.sizeDelta = new Vector2(800, 80);
+            titleRect.anchoredPosition = new Vector2(0, -20);
+            TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
+            titleText.text = "选择一张卡牌加入牌组";
+            titleText.fontSize = 36;
+            titleText.color = Color.white;
+            titleText.alignment = TextAlignmentOptions.Center;
+            titleText.fontStyle = FontStyles.Bold;
+            AssignNotoSansSCFont(titleText);
+            
+            // Card Options Parent (centered, horizontal layout)
+            GameObject cardOptionsParent = new GameObject("CardOptionsParent");
+            cardOptionsParent.transform.SetParent(contentContainer.transform, false);
+            RectTransform optionsRect = cardOptionsParent.AddComponent<RectTransform>();
+            optionsRect.anchorMin = new Vector2(0.5f, 0.5f);
+            optionsRect.anchorMax = new Vector2(0.5f, 0.5f);
+            optionsRect.pivot = new Vector2(0.5f, 0.5f);
+            optionsRect.sizeDelta = new Vector2(1200, 400);
+            optionsRect.anchoredPosition = new Vector2(0, -50);
+            
+            // Add HorizontalLayoutGroup
+            HorizontalLayoutGroup layoutGroup = cardOptionsParent.AddComponent<HorizontalLayoutGroup>();
+            layoutGroup.spacing = 300f;
+            layoutGroup.childAlignment = TextAnchor.MiddleCenter;
+            layoutGroup.childControlWidth = false;
+            layoutGroup.childControlHeight = false;
+            layoutGroup.childForceExpandWidth = false;
+            layoutGroup.childForceExpandHeight = false;
+            
+            // Confirm Button
+            GameObject confirmButton = new GameObject("ConfirmButton");
+            confirmButton.transform.SetParent(contentContainer.transform, false);
+            RectTransform buttonRect = confirmButton.AddComponent<RectTransform>();
+            buttonRect.anchorMin = new Vector2(0.5f, 0f);
+            buttonRect.anchorMax = new Vector2(0.5f, 0f);
+            buttonRect.pivot = new Vector2(0.5f, 0f);
+            buttonRect.sizeDelta = new Vector2(300, 80);
+            buttonRect.anchoredPosition = new Vector2(0, 50);
+            
+            Image buttonImage = confirmButton.AddComponent<Image>();
+            buttonImage.color = new Color(0.2f, 0.7f, 0.2f);
+            
+            Button button = confirmButton.AddComponent<Button>();
+            button.targetGraphic = buttonImage;
+            
+            // Button Text
+            GameObject buttonText = new GameObject("Text");
+            buttonText.transform.SetParent(confirmButton.transform, false);
+            RectTransform buttonTextRect = buttonText.AddComponent<RectTransform>();
+            buttonTextRect.anchorMin = Vector2.zero;
+            buttonTextRect.anchorMax = Vector2.one;
+            buttonTextRect.offsetMin = Vector2.zero;
+            buttonTextRect.offsetMax = Vector2.zero;
+            TextMeshProUGUI buttonTextComp = buttonText.AddComponent<TextMeshProUGUI>();
+            buttonTextComp.text = "确认选择";
+            buttonTextComp.fontSize = 28;
+            buttonTextComp.color = Color.white;
+            buttonTextComp.alignment = TextAlignmentOptions.Center;
+            buttonTextComp.fontStyle = FontStyles.Bold;
+            AssignNotoSansSCFont(buttonTextComp);
+            
+            // Add CardSelectionUI component
+            CardSelectionUI cardSelectionUI = selectionPanel.AddComponent<CardSelectionUI>();
+            cardSelectionUI.selectionPanel = selectionPanel;
+            cardSelectionUI.cardOptionsParent = cardOptionsParent.transform;
+            cardSelectionUI.titleText = titleText;
+            cardSelectionUI.confirmButton = button;
+            cardSelectionUI.backgroundOverlay = overlayImage;
+            
+            // Load card option prefab if it exists
+            GameObject cardOptionPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/CardOptionPrefab.prefab");
+            if (cardOptionPrefab != null)
+            {
+                cardSelectionUI.cardOptionPrefab = cardOptionPrefab;
+            }
+            
+            // Link to managers (if they exist)
+            DeckManager deckManager = GameObject.FindObjectOfType<DeckManager>();
+            if (deckManager != null)
+            {
+                cardSelectionUI.deckManager = deckManager;
+            }
+            
+            string[] cardDatabaseGuids = AssetDatabase.FindAssets("t:CardDatabase");
+            if (cardDatabaseGuids.Length > 0)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(cardDatabaseGuids[0]);
+                cardSelectionUI.cardDatabase = AssetDatabase.LoadAssetAtPath<CardDatabase>(path);
+            }
+            
+            // Link to CombatManager (if it exists)
+            CombatManager combatManager = GameObject.FindObjectOfType<CombatManager>();
+            if (combatManager != null)
+            {
+                combatManager.cardSelectionUI = cardSelectionUI;
+            }
+            
+            Debug.Log("Card Selection UI created successfully!");
+        }
+        
+        /// <summary>
+        /// Creates the Card Option Prefab for selection UI
+        /// </summary>
+        private static void CreateCardOptionPrefab()
+        {
+            // Check if prefab already exists
+            GameObject existingPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/CardOptionPrefab.prefab");
+            if (existingPrefab != null)
+            {
+                Debug.Log("CardOptionPrefab already exists, skipping creation.");
+                return;
+            }
+            
+            // Create Card Option Prefab
+            GameObject cardOptionPrefab = new GameObject("CardOptionUI");
+            RectTransform cardRect = cardOptionPrefab.AddComponent<RectTransform>();
+            cardRect.sizeDelta = new Vector2(300, 420);
+            
+            // Card Background
+            Image cardBg = cardOptionPrefab.AddComponent<Image>();
+            cardBg.color = new Color(0.95f, 0.95f, 0.95f);
+            
+            // Add Button component for click detection
+            Button button = cardOptionPrefab.AddComponent<Button>();
+            button.targetGraphic = cardBg;
+            
+            // Card Name
+            GameObject cardName = new GameObject("CardName");
+            cardName.transform.SetParent(cardOptionPrefab.transform, false);
+            RectTransform nameRect = cardName.AddComponent<RectTransform>();
+            nameRect.anchorMin = new Vector2(0, 0.85f);
+            nameRect.anchorMax = new Vector2(1, 1);
+            nameRect.offsetMin = new Vector2(15, 0);
+            nameRect.offsetMax = new Vector2(-15, -10);
+            TextMeshProUGUI nameText = cardName.AddComponent<TextMeshProUGUI>();
+            nameText.text = "Card Name";
+            nameText.fontSize = 24;
+            nameText.color = Color.black;
+            nameText.fontStyle = FontStyles.Bold;
+            nameText.alignment = TextAlignmentOptions.Center;
+            AssignNotoSansSCFont(nameText);
+            
+            // Card Description
+            GameObject cardDesc = new GameObject("CardDescription");
+            cardDesc.transform.SetParent(cardOptionPrefab.transform, false);
+            RectTransform descRect = cardDesc.AddComponent<RectTransform>();
+            descRect.anchorMin = new Vector2(0, 0.25f);
+            descRect.anchorMax = new Vector2(1, 0.85f);
+            descRect.offsetMin = new Vector2(15, 10);
+            descRect.offsetMax = new Vector2(-15, -10);
+            TextMeshProUGUI descText = cardDesc.AddComponent<TextMeshProUGUI>();
+            descText.text = "Card Description";
+            descText.fontSize = 16;
+            descText.color = Color.black;
+            descText.alignment = TextAlignmentOptions.TopLeft;
+            AssignNotoSansSCFont(descText);
+            
+            // Energy Cost (Top Right)
+            GameObject energyCost = new GameObject("EnergyCost");
+            energyCost.transform.SetParent(cardOptionPrefab.transform, false);
+            RectTransform energyRect = energyCost.AddComponent<RectTransform>();
+            energyRect.anchorMin = new Vector2(0.75f, 0.85f);
+            energyRect.anchorMax = new Vector2(1, 1);
+            energyRect.offsetMin = Vector2.zero;
+            energyRect.offsetMax = Vector2.zero;
+            TextMeshProUGUI energyText = energyCost.AddComponent<TextMeshProUGUI>();
+            energyText.text = "1";
+            energyText.fontSize = 28;
+            energyText.color = Color.yellow;
+            energyText.alignment = TextAlignmentOptions.Center;
+            energyText.fontStyle = FontStyles.Bold;
+            AssignNotoSansSCFont(energyText);
+            
+            // Add CardOptionUI component
+            CardOptionUI cardOptionUI = cardOptionPrefab.AddComponent<CardOptionUI>();
+            cardOptionUI.cardNameText = nameText;
+            cardOptionUI.descriptionText = descText;
+            cardOptionUI.energyCostText = energyText;
+            cardOptionUI.cardBackground = cardBg;
+            
+            // Save as prefab
+            string prefabPath = "Assets/Prefabs/CardOptionPrefab.prefab";
+            string prefabDir = System.IO.Path.GetDirectoryName(prefabPath);
+            if (!System.IO.Directory.Exists(prefabDir))
+            {
+                System.IO.Directory.CreateDirectory(prefabDir);
+            }
+            
+            PrefabUtility.SaveAsPrefabAsset(cardOptionPrefab, prefabPath);
+            DestroyImmediate(cardOptionPrefab);
+            
+            Debug.Log($"Card Option Prefab created at {prefabPath}");
         }
     }
 }

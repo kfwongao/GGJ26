@@ -65,6 +65,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Noise:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -116,6 +120,7 @@ Material:
     - _Turb_Value: 0
     - _UVSec: 0
     - _UVSwitch: 1
+    - _Value: 0
     - _Ver_Reverse: 0
     - _ZWrite: 1
     - __dirty: 1
@@ -125,7 +130,7 @@ Material:
     - _Displacment: {r: 0, g: 0, b: 0, a: 0}
     - _Diss_UV: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _Main_Color: {r: 0, g: 0.48543692, b: 1, a: 1}
+    - _Main_Color: {r: 1, g: 1, b: 1, a: 1}
     - _Main_UV: {r: 0, g: -0.2, b: 0, a: 0}
     - _Polar_UV: {r: 0, g: 0, b: 0, a: 0}
     - _Tex_2_UV: {r: 0, g: 0, b: 0, a: 0}

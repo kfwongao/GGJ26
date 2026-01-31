@@ -48,6 +48,8 @@ namespace MaskMYDrama.UI
                     desc += $"\n攻击: {card.attackValue}";
                 if (card.defenceValue > 0)
                     desc += $"\n防御: {card.defenceValue}";
+                if (card.strengthValue > 0)
+                    desc += $"\n力量: +{card.strengthValue}";
                 descriptionText.text = desc;
             }
             
@@ -59,9 +61,21 @@ namespace MaskMYDrama.UI
         
         public void OnPointerClick(PointerEventData eventData)
         {
-            isSelected = !isSelected;
+            // Always select (don't toggle) - only one card can be selected
+            if (!isSelected)
+            {
+                SetSelected(true);
+                OnCardSelected?.Invoke(index);
+            }
+        }
+        
+        /// <summary>
+        /// Sets the selected state of this card
+        /// </summary>
+        public void SetSelected(bool selected)
+        {
+            isSelected = selected;
             UpdateVisualState();
-            OnCardSelected?.Invoke(index);
         }
         
         private void UpdateVisualState()

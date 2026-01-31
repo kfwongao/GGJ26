@@ -230,6 +230,20 @@ namespace MaskMYDrama.UI
         
         private void OnCardClicked(int handIndex)
         {
+            // Verify that the card at this index is actually selected before playing
+            if (handIndex < 0 || handIndex >= cardUIList.Count)
+                return;
+            
+            CardUI clickedCard = cardUIList[handIndex];
+            if (clickedCard == null || !clickedCard.IsSelected())
+            {
+                // Card is not selected, ignore the click
+                return;
+            }
+            
+            // Store the card that was clicked (before it's removed from hand)
+            int clickedHandIndex = handIndex;
+            
             if (combatManager.TryPlayCard(handIndex))
             {
                 // Card was played successfully - deselect all cards
@@ -241,9 +255,19 @@ namespace MaskMYDrama.UI
                     }
                 }
                 
-                UpdateCardHand();
+                // Update hand display (this will refresh after draw card effects)
+                // Use a coroutine to wait a frame for draw card effects to complete
+                StartCoroutine(UpdateHandAfterCardPlay());
                 UpdateAllUI();
             }
+        }
+        
+        private System.Collections.IEnumerator UpdateHandAfterCardPlay()
+        {
+            // Wait one frame to allow draw card effects to complete
+            yield return null;
+            UpdateCardHand();
+            UpdateAllUI();
         }
         
         private void OnEndTurnClicked()
