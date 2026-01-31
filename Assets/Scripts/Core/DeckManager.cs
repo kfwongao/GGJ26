@@ -49,7 +49,9 @@ namespace MaskMYDrama.Core
         [Header("Card Database")]
         [Tooltip("Card database for roguelike selection and starting cards")]
         public CardDatabase cardDatabase;
-        
+
+        public CardDatabaseList cardDatabaseList;
+
         public int HandCount => hand.Count;
         public int PoolCount => cardPool.Count;
         public int AbandonedCount => abandonedPile.Count;
@@ -80,13 +82,22 @@ namespace MaskMYDrama.Core
                 // Fallback to startingCards array
                 cardsToAdd = new List<Card>(startingCards);
             }
-            
+
             // Add starting cards to pool
+            Card cardTemp = cardsToAdd.FirstOrDefault();
             foreach (var card in cardsToAdd)
             {
                 if (card != null && card.poolType == CardPoolType.StartingPool)
                 {
+                    cardTemp = card;
                     cardPool.Add(new CardInstance(card));
+                }
+                else if (card == null && cardTemp != null)
+                {
+                    if(cardTemp != null && cardTemp.poolType == CardPoolType.StartingPool)
+                    {
+                        cardPool.Add(new CardInstance(cardTemp));
+                    }
                 }
             }
             

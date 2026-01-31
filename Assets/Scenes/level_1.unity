@@ -1859,6 +1859,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   cardDatabase: {fileID: 11400000, guid: 031dcf3bf1fe5f44e9bfeaf6de96b832, type: 2}
+  cardDatabaseList: {fileID: 11400000, guid: 81f88e693f891c34d9ac42f4a86c5594, type: 2}
 --- !u!114 &493661681
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1875,7 +1876,8 @@ MonoBehaviour:
   enemy: {fileID: 978641532}
   deckManager: {fileID: 493661680}
   effectExecutor: {fileID: 0}
-  cardDatabase: {fileID: 0}
+  cardDatabase: {fileID: 11400000, guid: 031dcf3bf1fe5f44e9bfeaf6de96b832, type: 2}
+  cardDatabaseList: {fileID: 11400000, guid: 81f88e693f891c34d9ac42f4a86c5594, type: 2}
   cardSelectionUI: {fileID: 1330212692}
   EnemySpawnGameObjectPool: {fileID: 1290264123}
   PlayerSpawnGameObjectPool: {fileID: 690314868}

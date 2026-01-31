@@ -50,7 +50,8 @@ namespace MaskMYDrama.Core
         public DeckManager deckManager;
         public CardEffectExecutor effectExecutor;
         public CardDatabase cardDatabase;
-        
+        public CardDatabaseList cardDatabaseList;
+
         [Header("Roguelike Selection")]
         [Tooltip("Card selection UI for roguelike card selection between levels")]
         public CardSelectionUI cardSelectionUI;
@@ -96,7 +97,14 @@ namespace MaskMYDrama.Core
             ObjectPool = new Dictionary<string, List<GameObject>>();
             go_next_level.gameObject.SetActive(false);
             re_try_current.gameObject.SetActive(false);
-            
+
+            string[] splitStr = MapsDataSingleton.Instance.MapName.Split('_');
+            if (splitStr.Length > 1)
+            {
+                int level = int.Parse(splitStr[1]);
+                
+            }
+
             // Initialize effect executor if not assigned
             if (effectExecutor == null)
             {
@@ -146,10 +154,10 @@ namespace MaskMYDrama.Core
                 int level = int.Parse(splitStr[1]);
                 
                 // Only draw roguelike card if not first level (level > 1)
-                if (level > 1 && cardDatabase != null && deckManager != null)
+                if (level > 1 && (cardDatabase != null || cardDatabaseList != null) && deckManager != null)
                 {
                     // Get one random card from roguelike pool
-                    List<Card> randomCards = cardDatabase.GetRandomCards(1);
+                    List<Card> randomCards = cardDatabaseList.cardDatabaseList[level] ? cardDatabaseList.cardDatabaseList[level].GetRandomCards() : cardDatabase.GetRandomCards(1);
                     if (randomCards.Count > 0)
                     {
                         // Add to draw pile (card pool)
@@ -447,6 +455,24 @@ namespace MaskMYDrama.Core
             switch (action.actionType)
             {
                 case EncoreActionType.AddRandomNewCard:
+                    if(cardDatabaseList != null)
+                    {
+                        // Check if this is not the first level
+                        string[] splitStr = MapsDataSingleton.Instance.MapName.Split('_');
+                        if (splitStr.Length > 1)
+                        {
+                            int level = int.Parse(splitStr[1]);
+                            List<Card> randomCards = cardDatabaseList.GetCardDatabase(level).GetRandomCards(1);
+                            if (randomCards.Count > 0)
+                            {
+                                deckManager.AddCardToPool(randomCards[0]);
+                                Debug.Log($"Encore: Added random card {randomCards[0].cardName} to draw pile");
+                                return;
+                            }
+                        }
+
+                    }
+
                     // Randomly add 1 new card to draw pile
                     if (cardDatabase != null)
                     {
