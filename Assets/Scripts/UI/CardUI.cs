@@ -221,6 +221,16 @@ namespace MaskMYDrama.UI
             if (cardInstance == null || cardInstance.cardData == null)
                 return;
             
+            if(cardBackground != null)
+            {
+                cardBackground.sprite = cardInstance.cardData.image;
+            }
+
+            if (cardTypeIcon != null)
+            {
+                cardTypeIcon.sprite = cardInstance.cardData.image;
+            }
+
             if (cardNameText != null)
                 cardNameText.text = cardInstance.cardData.cardName;
             

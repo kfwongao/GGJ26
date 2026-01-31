@@ -5172,7 +5172,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0.2}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 110}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1663075289
@@ -5463,13 +5463,17 @@ MonoBehaviour:
   enemyHealthBar: {fileID: 1012687503}
   energyDisplay: {fileID: 74584579}
   cardHandParent: {fileID: 1663075288}
-  cardUIPrefab: {fileID: 258022841592305777, guid: b986999437d761244a95d5197b05b045, type: 3}
+  cardUIPrefab: {fileID: 4208798113383990315, guid: 215e484acdc43b943b430fe27c709b18, type: 3}
   arcCardLayout: {fileID: 0}
   endTurnButton: {fileID: 1708321477}
   poolCountText: {fileID: 15949481}
   abandonedCountText: {fileID: 489238597}
   playerNameText: {fileID: 1304532028}
   levelText: {fileID: 682581381}
+  playerSprite: {fileID: 0}
+  enemySprite: {fileID: 0}
+  highlightColor: {r: 1, g: 1, b: 0.5, a: 1}
+  highlightDuration: 0.3
 --- !u!1 &1765287812
 GameObject:
   m_ObjectHideFlags: 0

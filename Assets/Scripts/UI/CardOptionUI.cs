@@ -41,6 +41,11 @@ namespace MaskMYDrama.UI
             index = cardIndex;
             isSelected = false;
             isEncoreMode = false;
+
+            if (cardBackground != null)
+            {
+                cardBackground.sprite = card.image;
+            }
             
             if (cardNameText != null)
                 cardNameText.text = card.cardName;
