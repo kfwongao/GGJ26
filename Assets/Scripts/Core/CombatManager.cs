@@ -154,15 +154,35 @@ namespace MaskMYDrama.Core
                 int level = int.Parse(splitStr[1]);
                 
                 // Only draw roguelike card if not first level (level > 1)
-                if (level > 1 && (cardDatabase != null || cardDatabaseList != null) && deckManager != null)
+                if (level > 1 && deckManager != null)
                 {
-                    // Get one random card from roguelike pool
-                    List<Card> randomCards = cardDatabaseList.cardDatabaseList[level] ? cardDatabaseList.cardDatabaseList[level].GetRandomCards() : cardDatabase.GetRandomCards(1);
-                    if (randomCards.Count > 0)
+                    List<Card> randomCards = null;
+                    
+                    // Try to get card from CardDatabaseList first, then fallback to CardDatabase
+                    if (cardDatabaseList != null)
+                    {
+                        CardDatabase levelDatabase = cardDatabaseList.GetCardDatabase(level);
+                        if (levelDatabase != null)
+                        {
+                            randomCards = levelDatabase.GetRandomCards(1);
+                        }
+                    }
+                    
+                    // Fallback to single CardDatabase if CardDatabaseList didn't work
+                    if ((randomCards == null || randomCards.Count == 0) && cardDatabase != null)
+                    {
+                        randomCards = cardDatabase.GetRandomCards(1);
+                    }
+                    
+                    if (randomCards != null && randomCards.Count > 0)
                     {
                         // Add to draw pile (card pool)
                         deckManager.AddCardToPool(randomCards[0]);
                         Debug.Log($"Level {level}: Added roguelike card {randomCards[0].cardName} to draw pile");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Level {level}: No roguelike cards available to add to draw pile.");
                     }
                 }
             }
@@ -367,6 +387,35 @@ namespace MaskMYDrama.Core
             // If Encore is active and not final level, show Encore card selection
             if (PlayerData.Instance.isEncoreActive && !isFinalLevel && cardSelectionUI != null)
             {
+                // Validate Encore actions are assigned
+                if (encoreCardActions == null || encoreCardActions.Length != 3)
+                {
+                    Debug.LogError("EncoreCardActions array is not properly set up! It must contain exactly 3 EncoreCardAction ScriptableObjects. Please assign them in the CombatManager Inspector.");
+                    // Fallback to regular card selection
+                    cardSelectionUI.OnCardSelected += OnRoguelikeCardSelected;
+                    cardSelectionUI.ShowCardSelection();
+                    return;
+                }
+                
+                // Check for null actions
+                bool hasNullAction = false;
+                for (int i = 0; i < encoreCardActions.Length; i++)
+                {
+                    if (encoreCardActions[i] == null)
+                    {
+                        Debug.LogError($"EncoreCardAction at index {i} is null! Please assign all 3 EncoreCardAction ScriptableObjects in the CombatManager Inspector.");
+                        hasNullAction = true;
+                    }
+                }
+                
+                if (hasNullAction)
+                {
+                    // Fallback to regular card selection
+                    cardSelectionUI.OnCardSelected += OnRoguelikeCardSelected;
+                    cardSelectionUI.ShowCardSelection();
+                    return;
+                }
+                
                 // Show Encore card selection
                 cardSelectionUI.OnEncoreCardActionSelected += OnEncoreCardActionSelected;
                 cardSelectionUI.ShowEncoreCardSelection(encoreCardActions);

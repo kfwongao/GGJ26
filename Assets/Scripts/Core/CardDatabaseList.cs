@@ -21,7 +21,22 @@ namespace MaskMYDrama.Core
         
         public CardDatabase GetCardDatabase(int level)
         {
-            return cardDatabaseList[level];
+            if (cardDatabaseList == null || cardDatabaseList.Count == 0)
+            {
+                Debug.LogWarning($"CardDatabaseList is empty or null! Cannot get database for level {level}.");
+                return null;
+            }
+            
+            // Clamp level to valid range (0 to count-1)
+            // If level exceeds available databases, use the last one
+            int index = Mathf.Clamp(level, 0, cardDatabaseList.Count - 1);
+            
+            if (index != level)
+            {
+                Debug.LogWarning($"Level {level} is out of range (0-{cardDatabaseList.Count - 1}). Using database at index {index} instead.");
+            }
+            
+            return cardDatabaseList[index];
         }
 
     }

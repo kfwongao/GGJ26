@@ -6,6 +6,7 @@ using TMPro;
 using MaskMYDrama.Core;
 using MaskMYDrama.Combat;
 using MaskMYDrama.Cards;
+using DG.Tweening;
 
 namespace MaskMYDrama.UI
 {
@@ -50,8 +51,26 @@ namespace MaskMYDrama.UI
         public TextMeshProUGUI playerNameText;
         public TextMeshProUGUI levelText;
         
+        [Header("Sprite Highlighting")]
+        [Tooltip("Player sprite/image component for highlighting")]
+        public Image playerSprite;
+        [Tooltip("Enemy sprite/image component for highlighting")]
+        public Image enemySprite;
+        [Tooltip("Color to use when highlighting sprites")]
+        public Color highlightColor = new Color(1f, 1f, 0.5f, 1f); // Yellow tint
+        [Tooltip("Duration for highlight animation")]
+        public float highlightDuration = 0.3f;
+        
         private List<CardUI> cardUIList = new List<CardUI>();
         private HorizontalLayoutGroup horizontalLayoutGroup;
+        
+        // Highlighting state
+        private Image currentlyHighlightedSprite = null;
+        private Color originalPlayerColor = Color.white;
+        private Color originalEnemyColor = Color.white;
+        private bool originalPlayerColorStored = false;
+        private bool originalEnemyColorStored = false;
+        private Tween highlightTween = null;
         
         private void Awake()
         {
@@ -119,6 +138,18 @@ namespace MaskMYDrama.UI
             if(levelText != null)
             {
                 levelText.text = MapsDataSingleton.Instance.MapName;
+            }
+            
+            // Store original sprite colors
+            if (playerSprite != null)
+            {
+                originalPlayerColor = playerSprite.color;
+                originalPlayerColorStored = true;
+            }
+            if (enemySprite != null)
+            {
+                originalEnemyColor = enemySprite.color;
+                originalEnemyColorStored = true;
             }
             
             UpdateAllUI();
@@ -226,6 +257,42 @@ namespace MaskMYDrama.UI
                     cardUIList[i].DeselectCard();
                 }
             }
+            
+            // Highlight sprite based on card type
+            if (handIndex >= 0 && handIndex < cardUIList.Count)
+            {
+                // Verify the card is actually selected
+                CardUI selectedCard = cardUIList[handIndex];
+                if (selectedCard != null && selectedCard.IsSelected())
+                {
+                    var hand = deckManager.GetHand();
+                    if (handIndex < hand.Count && hand[handIndex] != null && hand[handIndex].cardData != null)
+                    {
+                        CardType cardType = hand[handIndex].cardData.cardType;
+                        
+                        // If card type is Attack, highlight enemy sprite
+                        // Otherwise, highlight player sprite (default)
+                        if (cardType == CardType.Attack)
+                        {
+                            HighlightSprite(enemySprite, ref originalEnemyColor);
+                        }
+                        else
+                        {
+                            HighlightSprite(playerSprite, ref originalPlayerColor);
+                        }
+                    }
+                }
+                else
+                {
+                    // Card was deselected, remove highlight
+                    RemoveHighlight();
+                }
+            }
+            else
+            {
+                // Invalid index, remove highlight
+                RemoveHighlight();
+            }
         }
         
         private void OnCardClicked(int handIndex)
@@ -240,6 +307,9 @@ namespace MaskMYDrama.UI
                 // Card is not selected, ignore the click
                 return;
             }
+            
+            // Remove highlighting when card is played
+            RemoveHighlight();
             
             // Store the card that was clicked (before it's removed from hand)
             int clickedHandIndex = handIndex;
@@ -362,7 +432,94 @@ namespace MaskMYDrama.UI
             if (combatManager != null && combatManager.IsCombatActive())
             {
                 UpdateAllUI();
+                
+                // Check if any card is selected, remove highlight if none are selected
+                bool anyCardSelected = false;
+                foreach (var cardUI in cardUIList)
+                {
+                    if (cardUI != null && cardUI.IsSelected())
+                    {
+                        anyCardSelected = true;
+                        break;
+                    }
+                }
+                
+                // If no cards are selected but we have a highlight, remove it
+                if (!anyCardSelected && currentlyHighlightedSprite != null)
+                {
+                    RemoveHighlight();
+                }
             }
+        }
+        
+        /// <summary>
+        /// Highlights a sprite based on card type selection.
+        /// </summary>
+        private void HighlightSprite(Image sprite, ref Color originalColor)
+        {
+            // Remove previous highlight first
+            RemoveHighlight();
+            
+            if (sprite == null)
+                return;
+            
+            // Store original color if not already stored
+            if (sprite == playerSprite && !originalPlayerColorStored)
+            {
+                originalPlayerColor = sprite.color;
+                originalPlayerColorStored = true;
+                originalColor = originalPlayerColor;
+            }
+            else if (sprite == enemySprite && !originalEnemyColorStored)
+            {
+                originalEnemyColor = sprite.color;
+                originalEnemyColorStored = true;
+                originalColor = originalEnemyColor;
+            }
+            
+            currentlyHighlightedSprite = sprite;
+            
+            // Kill any existing highlight tween
+            if (highlightTween != null && highlightTween.IsActive())
+            {
+                highlightTween.Kill();
+            }
+            
+            // Animate to highlight color
+            highlightTween = sprite.DOColor(highlightColor, highlightDuration)
+                .SetEase(Ease.OutQuad);
+        }
+        
+        /// <summary>
+        /// Removes highlighting from the currently highlighted sprite.
+        /// </summary>
+        private void RemoveHighlight()
+        {
+            if (currentlyHighlightedSprite == null)
+                return;
+            
+            // Kill any existing highlight tween
+            if (highlightTween != null && highlightTween.IsActive())
+            {
+                highlightTween.Kill();
+            }
+            
+            // Restore original color
+            Color colorToRestore = Color.white;
+            if (currentlyHighlightedSprite == playerSprite)
+            {
+                colorToRestore = originalPlayerColor;
+            }
+            else if (currentlyHighlightedSprite == enemySprite)
+            {
+                colorToRestore = originalEnemyColor;
+            }
+            
+            // Animate back to original color
+            highlightTween = currentlyHighlightedSprite.DOColor(colorToRestore, highlightDuration)
+                .SetEase(Ease.OutQuad);
+            
+            currentlyHighlightedSprite = null;
         }
         
         private void OnDestroy()
@@ -372,6 +529,12 @@ namespace MaskMYDrama.UI
                 combatManager.OnPlayerTurnStart -= OnPlayerTurnStart;
                 combatManager.OnEnemyTurnStart -= OnEnemyTurnStart;
                 combatManager.OnStateChanged -= OnCombatStateChanged;
+            }
+            
+            // Clean up highlight tween
+            if (highlightTween != null && highlightTween.IsActive())
+            {
+                highlightTween.Kill();
             }
         }
     }

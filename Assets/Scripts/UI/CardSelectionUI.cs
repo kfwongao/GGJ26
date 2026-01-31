@@ -138,6 +138,9 @@ namespace MaskMYDrama.UI
                 return;
             }
             
+            // Clear Encore actions to ensure we're in regular card selection mode
+            encoreCardActions.Clear();
+            
             // Get 3 random cards from Roguelike Pool
             cardOptions = cardDatabase.GetRandomCards(3);
             
@@ -373,6 +376,14 @@ namespace MaskMYDrama.UI
                 }
             }
             cardOptionUIs.Clear();
+            
+            // Clear selection state
+            cardOptions.Clear();
+            encoreCardActions.Clear();
+            selectedCard = null;
+            selectedEncoreAction = null;
+            selectedIndex = -1;
+            selectedEncoreIndex = -1;
         }
         
         /// <summary>
@@ -380,10 +391,26 @@ namespace MaskMYDrama.UI
         /// </summary>
         public void ShowEncoreCardSelection(EncoreCardAction[] actions)
         {
-            if (actions == null || actions.Length != 3)
+            if (actions == null)
             {
-                Debug.LogError("EncoreCardActions array must contain exactly 3 actions!");
+                Debug.LogError("EncoreCardActions array is null! Please assign 3 EncoreCardAction ScriptableObjects in CombatManager.");
                 return;
+            }
+            
+            if (actions.Length != 3)
+            {
+                Debug.LogError($"EncoreCardActions array must contain exactly 3 actions! Current length: {actions.Length}");
+                return;
+            }
+            
+            // Check if any actions are null
+            for (int i = 0; i < actions.Length; i++)
+            {
+                if (actions[i] == null)
+                {
+                    Debug.LogError($"EncoreCardAction at index {i} is null! Please assign all 3 EncoreCardAction ScriptableObjects in CombatManager.");
+                    return;
+                }
             }
             
             // Store Encore actions
@@ -434,61 +461,63 @@ namespace MaskMYDrama.UI
             }
             cardOptionUIs.Clear();
             
+            // Clear regular card options to ensure we're in Encore mode
+            cardOptions.Clear();
+            
             // Wait a frame for cleanup
             yield return null;
             
             // Create Encore action option UIs
-            // Note: We'll reuse CardOptionUI but display Encore action info instead
-            // This assumes CardOptionUI can handle EncoreCardAction, or we need to create a separate UI component
-            // For now, we'll create a simple text-based display
             for (int i = 0; i < encoreCardActions.Count; i++)
             {
-                if (cardOptionPrefab != null && encoreCardActions[i] != null)
+                if (cardOptionPrefab == null)
                 {
-                    GameObject actionObj = Instantiate(cardOptionPrefab, cardOptionsParent);
+                    Debug.LogError("CardOptionPrefab is not assigned in CardSelectionUI!");
+                    continue;
+                }
+                
+                if (encoreCardActions[i] == null)
+                {
+                    Debug.LogError($"EncoreCardAction at index {i} is null! Skipping display.");
+                    continue;
+                }
+                
+                GameObject actionObj = Instantiate(cardOptionPrefab, cardOptionsParent);
+                
+                // Setup Encore action display using CardOptionUI
+                CardOptionUI optionUI = actionObj.GetComponent<CardOptionUI>();
+                if (optionUI != null)
+                {
+                    // Use the new SetupEncoreAction method
+                    optionUI.SetupEncoreAction(encoreCardActions[i], i);
+                    optionUI.OnCardSelected += OnEncoreActionSelected;
+                    cardOptionUIs.Add(optionUI);
                     
-                    // Setup Encore action display
-                    // Note: This assumes CardOptionUI can be adapted or we create EncoreActionOptionUI
-                    // For now, we'll try to use CardOptionUI with a workaround
-                    CardOptionUI optionUI = actionObj.GetComponent<CardOptionUI>();
-                    if (optionUI != null)
+                    // Animate card entrance
+                    RectTransform actionRect = actionObj.GetComponent<RectTransform>();
+                    if (actionRect != null)
                     {
-                        // We'll need to modify CardOptionUI to support Encore actions
-                        // For now, create a simple text display
-                        SetupEncoreActionDisplay(actionObj, encoreCardActions[i], i);
-                        cardOptionUIs.Add(optionUI);
-                        
-                        // Animate card entrance
-                        RectTransform actionRect = actionObj.GetComponent<RectTransform>();
-                        if (actionRect != null)
-                        {
-                            actionRect.localScale = Vector3.zero;
-                            actionRect.DOScale(normalCardScale, 0.3f)
-                                .SetDelay(i * 0.1f)
-                                .SetEase(DG.Tweening.Ease.OutBack);
-                        }
+                        actionRect.localScale = Vector3.zero;
+                        actionRect.DOScale(normalCardScale, 0.3f)
+                            .SetDelay(i * 0.1f)
+                            .SetEase(DG.Tweening.Ease.OutBack);
                     }
                 }
-            }
-        }
-        
-        /// <summary>
-        /// Sets up the display for an Encore action (temporary implementation)
-        /// </summary>
-        private void SetupEncoreActionDisplay(GameObject actionObj, EncoreCardAction action, int index)
-        {
-            // This is a simplified implementation
-            // In a full implementation, you would create an EncoreActionOptionUI component
-            // For now, we'll add a button click handler
-            UnityEngine.UI.Button button = actionObj.GetComponent<UnityEngine.UI.Button>();
-            if (button == null)
-            {
-                button = actionObj.AddComponent<UnityEngine.UI.Button>();
+                else
+                {
+                    Debug.LogError($"CardOptionUI component not found on prefab {cardOptionPrefab.name}! Make sure the prefab has a CardOptionUI component.");
+                }
             }
             
-            int capturedIndex = index; // Capture for lambda
-            button.onClick.RemoveAllListeners();
-            button.onClick.AddListener(() => OnEncoreActionSelected(capturedIndex));
+            // Log if no cards were created
+            if (cardOptionUIs.Count == 0)
+            {
+                Debug.LogError("No Encore action cards were created! Check that cardOptionPrefab is assigned and has CardOptionUI component.");
+            }
+            else
+            {
+                Debug.Log($"Successfully created {cardOptionUIs.Count} Encore action cards for selection.");
+            }
         }
         
         /// <summary>

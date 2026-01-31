@@ -27,16 +27,20 @@ namespace MaskMYDrama.UI
         public Color selectedColor = Color.green;
         
         private Card card;
+        private EncoreCardAction encoreAction;
         private int index;
         private bool isSelected = false;
+        private bool isEncoreMode = false;
         
         public System.Action<int> OnCardSelected;
         
         public void SetupCard(Card cardData, int cardIndex)
         {
             card = cardData;
+            encoreAction = null;
             index = cardIndex;
             isSelected = false;
+            isEncoreMode = false;
             
             if (cardNameText != null)
                 cardNameText.text = card.cardName;
@@ -55,6 +59,30 @@ namespace MaskMYDrama.UI
             
             if (energyCostText != null)
                 energyCostText.text = card.energyCost.ToString();
+            
+            UpdateVisualState();
+        }
+        
+        /// <summary>
+        /// Sets up the UI to display an Encore card action
+        /// </summary>
+        public void SetupEncoreAction(EncoreCardAction action, int actionIndex)
+        {
+            encoreAction = action;
+            card = null;
+            index = actionIndex;
+            isSelected = false;
+            isEncoreMode = true;
+            
+            if (cardNameText != null)
+                cardNameText.text = encoreAction.GetActionName();
+            
+            if (descriptionText != null)
+                descriptionText.text = encoreAction.GetDescription();
+            
+            // Hide or clear energy cost for Encore actions (they don't have energy costs)
+            if (energyCostText != null)
+                energyCostText.text = ""; // Or you could hide the text component
             
             UpdateVisualState();
         }
