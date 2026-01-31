@@ -178,7 +178,7 @@ namespace MaskMYDrama.Core
                     {
                         // Add to draw pile (card pool)
                         deckManager.AddCardToPool(randomCards[0]);
-                        Debug.Log($"Level {level}: Added roguelike card {randomCards[0].cardName} to draw pile");
+                        Debug.Log($"Level {level}: Added roguelike card {randomCards[0]} to draw pile");
                     }
                     else
                     {
