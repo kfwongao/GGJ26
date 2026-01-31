@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -50,10 +51,30 @@ namespace MaskMYDrama.UI
         
         private List<CardUI> cardUIList = new List<CardUI>();
         
+        private void Awake()
+        {
+            // Subscribe to events early to catch any events that fire during Start()
+            SubscribeToEvents();
+        }
+        
         private void Start()
         {
             InitializeUI();
-            SubscribeToEvents();
+            // Ensure cards are displayed if combat has already started
+            StartCoroutine(InitializeCardsDelayed());
+        }
+        
+        private IEnumerator InitializeCardsDelayed()
+        {
+            // Wait one frame to ensure all Start() methods have completed
+            yield return null;
+            
+            // Check if combat is active and cards should be displayed
+            if (combatManager != null && combatManager.IsCombatActive() && 
+                deckManager != null && deckManager.HandCount > 0)
+            {
+                UpdateCardHand();
+            }
         }
         
         private void InitializeUI()
@@ -74,6 +95,12 @@ namespace MaskMYDrama.UI
             }
             
             UpdateAllUI();
+            
+            // If cards are already available (combat started before UI initialized), display them
+            if (deckManager != null && deckManager.HandCount > 0)
+            {
+                UpdateCardHand();
+            }
         }
         
         private void SubscribeToEvents()
@@ -90,6 +117,8 @@ namespace MaskMYDrama.UI
         {
             UpdateCardHand();
             UpdateAllUI();
+            // Enable card interaction during player turn
+            SetCardInteractionEnabled(true);
         }
         
         private void OnEnemyTurnStart()
@@ -134,8 +163,21 @@ namespace MaskMYDrama.UI
                         bool playable = player.HasEnoughEnergy(hand[i].GetEnergyCost());
                         cardUI.SetupCard(hand[i], i, playable);
                         cardUI.OnCardClicked += OnCardClicked;
+                        cardUI.OnCardSelected += OnCardSelected;
                         cardUIList.Add(cardUI);
                     }
+                }
+            }
+        }
+        
+        private void OnCardSelected(int handIndex)
+        {
+            // Deselect all other cards when one is selected
+            for (int i = 0; i < cardUIList.Count; i++)
+            {
+                if (cardUIList[i] != null && i != handIndex && cardUIList[i].IsSelected())
+                {
+                    cardUIList[i].DeselectCard();
                 }
             }
         }
@@ -144,7 +186,15 @@ namespace MaskMYDrama.UI
         {
             if (combatManager.TryPlayCard(handIndex))
             {
-                // Card was played successfully
+                // Card was played successfully - deselect all cards
+                for (int i = 0; i < cardUIList.Count; i++)
+                {
+                    if (cardUIList[i] != null && cardUIList[i].IsSelected())
+                    {
+                        cardUIList[i].DeselectCard();
+                    }
+                }
+                
                 UpdateCardHand();
                 UpdateAllUI();
             }
@@ -154,6 +204,7 @@ namespace MaskMYDrama.UI
         {
             if (combatManager.IsPlayerTurn())
             {
+                // Only end turn if player can't play any more cards
                 combatManager.EndPlayerTurn();
             }
         }

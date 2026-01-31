@@ -1,5 +1,6 @@
 using UnityEngine;
 using MaskMYDrama.Core;
+using UnityEngine.UI;
 
 namespace MaskMYDrama.Cards
 {
@@ -53,7 +54,11 @@ namespace MaskMYDrama.Cards
         
         [Tooltip("If true, playing this card draws an additional card")]
         public bool drawCard; // Draw additional card when played
-        
+
+        [Header("Card Image")]
+        [Tooltip("The Image Sprite of that card")]
+        public Sprite image; // Card is removed after use
+
         /// <summary>
         /// Returns the display name of the card.
         /// </summary>

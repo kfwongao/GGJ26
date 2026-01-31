@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 using MaskMYDrama.Cards;
+using DG.Tweening;
 
 namespace MaskMYDrama.UI
 {
@@ -12,13 +13,15 @@ namespace MaskMYDrama.UI
     /// Implements card interaction:
     /// - Visual display (name, description, energy cost)
     /// - Hover effects (highlight, scale up)
-    /// - Click to play
+    /// - Drag to play: Select on press, drag above center to play
     /// - Playable/unplayable state visualization
+    /// - Mobile touch support (press/release/drag)
+    /// - Graceful selection animations (move up, enlarge, shader effects)
     /// 
     /// Based on CSV: Cards in hand are displayed and clickable.
     /// Player can only play cards if energy >= card cost.
     /// </summary>
-    public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+    public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler, IDragHandler, IEndDragHandler
     {
         [Header("UI References")]
         public TextMeshProUGUI cardNameText;
@@ -31,12 +34,128 @@ namespace MaskMYDrama.UI
         public Color normalColor = Color.white;
         public Color highlightColor = Color.yellow;
         public Color unplayableColor = Color.gray;
+        public Color selectedColor = new Color(1f, 0.8f, 0.2f, 1f); // Golden highlight for selected card
+        
+        [Header("Animation Settings")]
+        [Tooltip("How much the card moves up when selected (in local Y units)")]
+        public float selectedYOffset = 50f;
+        [Tooltip("Scale multiplier when card is selected")]
+        public float selectedScale = 1.25f;
+        [Tooltip("Hover scale multiplier")]
+        public float hoverScale = 1.1f;
+        [Tooltip("Animation duration for selection")]
+        public float selectionDuration = 0.3f;
+        [Tooltip("Animation easing type")]
+        public Ease selectionEase = Ease.OutBack;
+        
+        [Header("Drag Settings")]
+        [Tooltip("Canvas reference for screen space calculations (auto-detected if null)")]
+        public Canvas canvas;
+        [Tooltip("Offset from cursor/finger position when dragging")]
+        public Vector2 dragOffset = Vector2.zero;
+        [Tooltip("Minimum Y position above screen center to trigger play (0.0 = center, 0.5 = top)")]
+        public float playThresholdY = 0.1f;
+        
+        [Header("Shader Settings")]
+        [Tooltip("Material with shader that supports UV time speed (optional)")]
+        public Material cardMaterial;
+        [Tooltip("Shader property name for UV time speed (e.g., _Main_UV, _Tex_2_UV)")]
+        public string uvSpeedPropertyName = "_Main_UV";
+        [Tooltip("Normal UV speed (Vector4: x, y, z, w)")]
+        public Vector4 normalUVSpeed = Vector4.zero;
+        [Tooltip("Selected UV speed (faster animation when selected)")]
+        public Vector4 selectedUVSpeed = new Vector4(0.5f, 0.5f, 0f, 0f);
         
         private CardInstance cardInstance;
         private int handIndex;
         private bool isPlayable;
+        private bool isSelected = false;
+        private bool isPressed = false;
+        private bool isDragging = false;
+        
+        // Store original state
+        private Vector3 originalPosition;
+        private Vector3 originalScale;
+        private Material originalMaterial;
+        private Material instanceMaterial;
+        
+        // Drag state
+        private Vector3 dragStartPosition;
+        private RectTransform rectTransform;
+        private Canvas parentCanvas;
+        private Transform originalParent;
+        private int originalSiblingIndex;
+        
+        // DOTween sequences
+        private Sequence selectionSequence;
+        private Tween hoverTween;
         
         public System.Action<int> OnCardClicked;
+        public System.Action<int> OnCardSelected;
+        
+        private void Awake()
+        {
+            // Get RectTransform
+            rectTransform = GetComponent<RectTransform>();
+            
+            // Find canvas if not assigned
+            if (canvas == null)
+            {
+                canvas = GetComponentInParent<Canvas>();
+            }
+            parentCanvas = canvas;
+            
+            // Create material instance if material is assigned
+            if (cardBackground != null && cardBackground.material != null)
+            {
+                originalMaterial = cardBackground.material;
+                instanceMaterial = new Material(originalMaterial);
+                cardBackground.material = instanceMaterial;
+                cardMaterial = instanceMaterial;
+            }
+            else if (cardMaterial != null)
+            {
+                instanceMaterial = new Material(cardMaterial);
+                if (cardBackground != null)
+                {
+                    cardBackground.material = instanceMaterial;
+                }
+            }
+        }
+        
+        private void Start()
+        {
+            // Store original state after layout group has positioned the card
+            // Use a coroutine to wait one frame for layout to complete
+            StartCoroutine(StoreOriginalStateDelayed());
+        }
+        
+        private System.Collections.IEnumerator StoreOriginalStateDelayed()
+        {
+            // Wait for layout group to position the card
+            yield return null;
+            originalPosition = transform.localPosition;
+            originalScale = transform.localScale;
+        }
+        
+        private void OnDestroy()
+        {
+            // Clean up tweens
+            if (selectionSequence != null && selectionSequence.IsActive())
+            {
+                selectionSequence.Kill();
+            }
+            if (hoverTween != null && hoverTween.IsActive())
+            {
+                hoverTween.Kill();
+            }
+            
+            // Clean up material instance
+            if (instanceMaterial != null)
+            {
+                Destroy(instanceMaterial);
+            }
+        }
         
         public void SetupCard(CardInstance card, int index, bool playable)
         {
@@ -44,8 +163,55 @@ namespace MaskMYDrama.UI
             handIndex = index;
             isPlayable = playable;
             
+            // Store original state if not already stored (in case SetupCard is called before Start)
+            if (originalScale == Vector3.zero)
+            {
+                originalPosition = transform.localPosition;
+                originalScale = transform.localScale;
+            }
+            else
+            {
+                // Reset to original state
+                ResetToOriginalState();
+            }
+            
             UpdateDisplay();
             UpdatePlayableState(playable);
+        }
+        
+        private void ResetToOriginalState()
+        {
+            // Kill any active animations
+            if (selectionSequence != null && selectionSequence.IsActive())
+            {
+                selectionSequence.Kill();
+            }
+            if (hoverTween != null && hoverTween.IsActive())
+            {
+                hoverTween.Kill();
+            }
+            
+            // Reset transform
+            transform.localPosition = originalPosition;
+            transform.localScale = originalScale;
+            
+            // Reset material shader parameters
+            if (instanceMaterial != null && !string.IsNullOrEmpty(uvSpeedPropertyName))
+            {
+                if (instanceMaterial.HasProperty(uvSpeedPropertyName))
+                {
+                    instanceMaterial.SetVector(uvSpeedPropertyName, normalUVSpeed);
+                }
+            }
+            
+            // Reset color
+            if (cardBackground != null)
+            {
+                cardBackground.color = isPlayable ? normalColor : unplayableColor;
+            }
+            
+            isSelected = false;
+            isPressed = false;
         }
         
         private void UpdateDisplay()
@@ -84,29 +250,279 @@ namespace MaskMYDrama.UI
         
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (cardBackground != null && isPlayable)
+            // Only show hover effect if not selected and not pressed
+            if (!isSelected && !isPressed && isPlayable)
             {
-                cardBackground.color = highlightColor;
+                if (cardBackground != null)
+                {
+                    cardBackground.color = highlightColor;
+                }
+                
+                // Animate hover scale
+                if (hoverTween != null && hoverTween.IsActive())
+                {
+                    hoverTween.Kill();
+                }
+                hoverTween = transform.DOScale(originalScale * hoverScale, 0.2f)
+                    .SetEase(Ease.OutQuad);
             }
-            // Show tooltip or enlarge card
-            transform.localScale = Vector3.one * 1.1f;
         }
         
         public void OnPointerExit(PointerEventData eventData)
         {
-            if (cardBackground != null)
+            // Only reset hover if not selected
+            if (!isSelected)
             {
-                cardBackground.color = isPlayable ? normalColor : unplayableColor;
+                if (cardBackground != null)
+                {
+                    cardBackground.color = isPlayable ? normalColor : unplayableColor;
+                }
+                
+                // Animate back to original scale
+                if (hoverTween != null && hoverTween.IsActive())
+                {
+                    hoverTween.Kill();
+                }
+                hoverTween = transform.DOScale(originalScale, 0.2f)
+                    .SetEase(Ease.OutQuad);
             }
-            transform.localScale = Vector3.one;
+        }
+        
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            // Mobile touch support: handle press down
+            if (isPlayable && !isSelected)
+            {
+                isPressed = true;
+                SelectCard();
+                // Notify that this card was selected
+                OnCardSelected?.Invoke(handIndex);
+            }
+        }
+        
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            // Mobile touch support: handle release
+            if (isPressed && !isDragging)
+            {
+                isPressed = false;
+                // If not dragged, just deselect (don't play card)
+                DeselectCard();
+            }
         }
         
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (isPlayable)
+            // Click no longer immediately plays the card
+            // Card is only played when dragged above screen center
+            // This prevents accidental plays on quick clicks
+        }
+        
+        public void OnDrag(PointerEventData eventData)
+        {
+            if (!isSelected || !isPlayable) return;
+            
+            isDragging = true;
+            
+            // Kill any position animations while dragging
+            if (selectionSequence != null && selectionSequence.IsActive())
             {
+                selectionSequence.Kill();
+            }
+            
+            // Convert screen position to world position for the card
+            Vector3 worldPoint;
+            RectTransform parentRect = parentCanvas.transform as RectTransform;
+            
+            if (RectTransformUtility.ScreenPointToWorldPointInRectangle(
+                parentRect,
+                eventData.position + dragOffset,
+                parentCanvas.worldCamera,
+                out worldPoint))
+            {
+                // Move card to follow cursor/finger
+                transform.position = worldPoint;
+            }
+        }
+        
+        public void OnEndDrag(PointerEventData eventData)
+        {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            isPressed = false;
+            
+            // Check if card is above screen center
+            if (IsCardAboveScreenCenter())
+            {
+                // Card is above center - play it
                 OnCardClicked?.Invoke(handIndex);
             }
+            else
+            {
+                // Card is below center - return to original position
+                DeselectCard();
+            }
+        }
+        
+        private bool IsCardAboveScreenCenter()
+        {
+            if (parentCanvas == null || rectTransform == null)
+                return false;
+            
+            // Get screen center
+            float screenCenterY = Screen.height * 0.5f;
+            
+            // Convert card world position to screen position
+            Vector3 cardScreenPos = RectTransformUtility.WorldToScreenPoint(
+                parentCanvas.worldCamera != null ? parentCanvas.worldCamera : Camera.main,
+                rectTransform.position);
+            
+            // Check if card Y position is above screen center (with threshold)
+            float thresholdY = screenCenterY + (Screen.height * playThresholdY);
+            return cardScreenPos.y > thresholdY;
+        }
+        
+        private void SelectCard()
+        {
+            if (isSelected) return;
+            
+            isSelected = true;
+            
+            // Store drag start position and parent info
+            dragStartPosition = transform.localPosition;
+            originalParent = transform.parent;
+            originalSiblingIndex = transform.GetSiblingIndex();
+            
+            // Move card to canvas root to allow free dragging (temporarily)
+            if (parentCanvas != null)
+            {
+                transform.SetParent(parentCanvas.transform, true);
+                transform.SetAsLastSibling(); // Bring to front
+            }
+            
+            // Kill any existing animations
+            if (selectionSequence != null && selectionSequence.IsActive())
+            {
+                selectionSequence.Kill();
+            }
+            if (hoverTween != null && hoverTween.IsActive())
+            {
+                hoverTween.Kill();
+            }
+            
+            // Create selection animation sequence
+            selectionSequence = DOTween.Sequence();
+            
+            // Calculate target position in world space
+            // First get the world position of the original position
+            Vector3 originalWorldPos = originalParent != null 
+                ? originalParent.TransformPoint(originalPosition) 
+                : originalPosition;
+            
+            // Calculate offset in world space (convert local up to world up)
+            Vector3 worldUp = originalParent != null 
+                ? originalParent.TransformDirection(Vector3.up) 
+                : Vector3.up;
+            Vector3 targetPosition = originalWorldPos + worldUp * selectedYOffset;
+            
+            // Move card up (but we'll allow dragging to override this)
+            selectionSequence.Append(transform.DOMove(targetPosition, selectionDuration)
+                .SetEase(selectionEase));
+            
+            // Enlarge card
+            selectionSequence.Join(transform.DOScale(originalScale * selectedScale, selectionDuration)
+                .SetEase(selectionEase));
+            
+            // Change color to selected color
+            if (cardBackground != null)
+            {
+                selectionSequence.Join(cardBackground.DOColor(selectedColor, selectionDuration)
+                    .SetEase(Ease.OutQuad));
+            }
+            
+            // Modify shader UV time speed
+            if (instanceMaterial != null && !string.IsNullOrEmpty(uvSpeedPropertyName))
+            {
+                if (instanceMaterial.HasProperty(uvSpeedPropertyName))
+                {
+                    selectionSequence.Join(DOTween.To(
+                        () => instanceMaterial.GetVector(uvSpeedPropertyName),
+                        x => instanceMaterial.SetVector(uvSpeedPropertyName, x),
+                        selectedUVSpeed,
+                        selectionDuration
+                    ).SetEase(Ease.OutQuad));
+                }
+            }
+            
+            selectionSequence.Play();
+        }
+        
+        public void DeselectCard()
+        {
+            if (!isSelected) return;
+            
+            isSelected = false;
+            isPressed = false;
+            isDragging = false;
+            
+            // Kill any existing animations
+            if (selectionSequence != null && selectionSequence.IsActive())
+            {
+                selectionSequence.Kill();
+            }
+            if (hoverTween != null && hoverTween.IsActive())
+            {
+                hoverTween.Kill();
+            }
+            
+            // Create deselection animation sequence
+            selectionSequence = DOTween.Sequence();
+            
+            // Return card to original parent first (before animating)
+            if (originalParent != null)
+            {
+                transform.SetParent(originalParent, true);
+                transform.SetSiblingIndex(originalSiblingIndex);
+            }
+            
+            // Move card back to original position (now in local space of original parent)
+            selectionSequence.Append(transform.DOLocalMove(originalPosition, selectionDuration)
+                .SetEase(Ease.InBack));
+            
+            // Scale back to original
+            selectionSequence.Join(transform.DOScale(originalScale, selectionDuration)
+                .SetEase(Ease.InBack));
+            
+            // Reset color
+            if (cardBackground != null)
+            {
+                selectionSequence.Join(cardBackground.DOColor(
+                    isPlayable ? normalColor : unplayableColor,
+                    selectionDuration)
+                    .SetEase(Ease.OutQuad));
+            }
+            
+            // Reset shader UV time speed
+            if (instanceMaterial != null && !string.IsNullOrEmpty(uvSpeedPropertyName))
+            {
+                if (instanceMaterial.HasProperty(uvSpeedPropertyName))
+                {
+                    selectionSequence.Join(DOTween.To(
+                        () => instanceMaterial.GetVector(uvSpeedPropertyName),
+                        x => instanceMaterial.SetVector(uvSpeedPropertyName, x),
+                        normalUVSpeed,
+                        selectionDuration
+                    ).SetEase(Ease.OutQuad));
+                }
+            }
+            
+            selectionSequence.Play();
+        }
+        
+        public bool IsSelected()
+        {
+            return isSelected;
         }
     }
 }

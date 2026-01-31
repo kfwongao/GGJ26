@@ -41,10 +41,12 @@ namespace MaskMYDrama.Combat
         /// Called during enemy turn by CombatManager.
         /// </summary>
         /// <param name="target">The player to attack</param>
-        public void ExecuteAttack(Player target)
+        public int ExecuteAttack(Player target)
         {
             int damage = GetAttackDamage();
             target.TakeDamage(damage);
+
+            return damage;
         }
     }
 }
