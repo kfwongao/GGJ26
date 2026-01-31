@@ -25,4 +25,4 @@ MonoBehaviour:
   poolType: 1
   cardEffect: {fileID: 0}
   useAdvancedEffects: 0
-  image: {fileID: 0}
+  image: {fileID: 21300000, guid: f24e80a6e18518c4081b458963b484db, type: 3}

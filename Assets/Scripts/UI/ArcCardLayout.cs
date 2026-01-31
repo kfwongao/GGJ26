@@ -19,7 +19,7 @@ namespace MaskMYDrama.UI
         
         [Tooltip("Width factor for the curve (controls how wide the curve spreads)")]
         [Range(0.1f, 2f)]
-        public float curveWidth = 1.6f;
+        public float curveWidth = 2f;
         
         [Tooltip("Vertical offset from center (positive = up, negative = down)")]
         public float verticalOffset = 0f;
