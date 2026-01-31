@@ -115,6 +115,11 @@ namespace MaskMYDrama.UI
             {
                 endTurnButton.onClick.AddListener(OnEndTurnClicked);
             }
+
+            if(levelText != null)
+            {
+                levelText.text = MapsDataSingleton.Instance.MapName;
+            }
             
             UpdateAllUI();
             

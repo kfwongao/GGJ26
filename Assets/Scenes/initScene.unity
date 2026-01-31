@@ -324,7 +324,7 @@ MonoBehaviour:
   m_text: 'Encore! Masque! '
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 26c30b658e3812d4da93ab84fc7fdfe8, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 5854881634260427501, guid: 26c30b658e3812d4da93ab84fc7fdfe8, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -387,7 +387,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 1
+  m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &340847110
@@ -664,10 +664,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Presented By: Wong Kin Fat'
+  m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 31e60cec22a487446b32eba614f688ec, type: 2}
-  m_sharedMaterial: {fileID: 4025358324999151524, guid: 31e60cec22a487446b32eba614f688ec, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1100,6 +1100,7 @@ MonoBehaviour:
   LoadingBar: {fileID: 1636486707}
   LoadingTextMeshPro: {fileID: 1345064354}
   LoadingScene: {fileID: 534520503}
+  MapNameTextMeshPro: {fileID: 515814631}
   loadingProgressValue: 0
   currentSceneName: initScene
   initSceneName: initScene
@@ -1193,12 +1194,12 @@ GameObject:
   m_Component:
   - component: {fileID: 1442779995}
   m_Layer: 5
-  m_Name: Presenter
+  m_Name: MapName
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1442779995
 RectTransform:
   m_ObjectHideFlags: 0

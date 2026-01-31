@@ -12,6 +12,7 @@ public class initSceneManager : MonoSingleton<initSceneManager>
     public Slider LoadingBar;
     public TextMeshProUGUI LoadingTextMeshPro;
     public GameObject LoadingScene;
+    public TextMeshProUGUI MapNameTextMeshPro;
     //private SceneManager sceneManager;
 
     public float loadingProgressValue = 0;
@@ -105,6 +106,7 @@ public class initSceneManager : MonoSingleton<initSceneManager>
         loadingProgressValue = 0;
         //LoadingBar.value = 0;
         LoadingScene.SetActive(true);
+        MapNameTextMeshPro.text = $"Loading {name} ...";
 
         // Set 0 for progress values.
         LoadingBar.value = currentValue = targetValue = 0;
