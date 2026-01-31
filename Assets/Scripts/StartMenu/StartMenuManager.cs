@@ -222,7 +222,7 @@ public class StartMenuManager : MonoBehaviour
     public void onStartButtonClick()
     {
         MapsDataSingleton.Instance.MapName = "level_1";
-        MapsDataSingleton.Instance.LocationAreaName = "Moon Surface";
+        MapsDataSingleton.Instance.LocationAreaName = "level_1";
         initSceneManager.Instance.InitScene("level_1");
     }
 
@@ -231,7 +231,7 @@ public class StartMenuManager : MonoBehaviour
         PlayerData.Instance.ClearData();
         File.Delete(Path.Combine(Application.persistentDataPath, "inventory.txt"));
         MapsDataSingleton.Instance.MapName = "level_1";
-        MapsDataSingleton.Instance.LocationAreaName = "Moon Surface";
+        MapsDataSingleton.Instance.LocationAreaName = "level_1";
         initSceneManager.Instance.InitScene("level_1");
     }
 

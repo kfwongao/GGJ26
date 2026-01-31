@@ -132,7 +132,9 @@ namespace MaskMYDrama.UI
         
         private System.Collections.IEnumerator StoreOriginalStateDelayed()
         {
-            // Wait for layout group to position the card
+            // Wait for layout (arc layout or horizontal layout) to position the card
+            // Wait 2 frames to ensure arc layout has positioned the card
+            yield return null;
             yield return null;
             originalPosition = transform.localPosition;
             originalScale = transform.localScale;

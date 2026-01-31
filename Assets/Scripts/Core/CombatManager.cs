@@ -1,9 +1,11 @@
-using System.Collections;
-using UnityEngine;
-using MaskMYDrama.Combat;
 using MaskMYDrama.Cards;
+using MaskMYDrama.Combat;
 using MaskMYDrama.Core;
+using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using static Cinemachine.DocumentationSortingAttribute;
 
 namespace MaskMYDrama.Core
 {
@@ -66,12 +68,16 @@ namespace MaskMYDrama.Core
 
         public Dictionary<string, List<GameObject>> ObjectPool; // Implement if have time left
 
-
+        public bool canGoNextRound = true;
+        public Button go_next_level;
+        public Button re_try_current;
 
 
         private void Start()
         {
             ObjectPool = new Dictionary<string, List<GameObject>>();
+            go_next_level.gameObject.SetActive(false);
+            re_try_current.gameObject.SetActive(false);
             StartCombat();
         }
         
@@ -185,14 +191,51 @@ namespace MaskMYDrama.Core
             if (!enemy.IsAlive())
             {
                 EndCombatInfoHolder playerIsNotAlive = Instantiate(endCombatInfoHolder, CombatInfoPool.transform);
-                playerIsNotAlive.Init($"Victory, Cheer.....", Color.yellow);
+                playerIsNotAlive.Init($"下关更精彩,惊喜彩蛋", Color.yellow);
 
                 currentState = CombatState.Victory;
                 OnStateChanged?.Invoke(currentState);
                 OnCombatEnd?.Invoke();
+
+                go_next_level.gameObject.SetActive(true);
+                re_try_current.gameObject.SetActive(false);
+                canGoNextRound = true;
             }
         }
-        
+
+        public void Go_Next_Level()
+        {
+
+
+            string[] splitStr = MapsDataSingleton.Instance.MapName.Split('_');
+            if (splitStr.Length > 1)
+            {
+                int level = int.Parse(splitStr[1]);
+                if (canGoNextRound == true)
+                {
+                    ++level;
+                }
+                switch (level)
+                {
+                    case 1:
+                    case 2:
+                    case 3:
+                        MapsDataSingleton.Instance.MapName = $"level_{level}";
+                        MapsDataSingleton.Instance.LocationAreaName = $"level_{level}";
+                        initSceneManager.Instance.InitScene($"level_{level}");
+
+                        break;
+                    case 4:
+                        EndCombatInfoHolder endgamemsg = Instantiate(endCombatInfoHolder, CombatInfoPool.transform);
+                        endgamemsg.Init($"你是大赢家，多谢你的努力。祝你有愉快的一天。记得给我们一个赞。", Color.yellow);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+
         private bool CanPlayerPlayAnyCard()
         {
             foreach (var card in deckManager.GetHand())
@@ -217,6 +260,10 @@ namespace MaskMYDrama.Core
 
                 EndCombatInfoHolder playerIsNotAlive = Instantiate(endCombatInfoHolder, CombatInfoPool.transform);
                 playerIsNotAlive.Init($"You Lose.....", Color.red);
+
+                go_next_level.gameObject.SetActive(false);
+                re_try_current.gameObject.SetActive(true);
+                canGoNextRound = false;
 
 
                 currentState = CombatState.Defeat;
@@ -244,7 +291,7 @@ namespace MaskMYDrama.Core
             // Play attack anim for enemy
 
             // display attack skill name at enemy holder
-            DamageInfoHolder attackSkillName = Instantiate(damageInfoHolder, CombatInfoPool.transform);
+            CombatInfoHolder attackSkillName = Instantiate(combatInfoHolder, CombatInfoPool.transform);
             attackSkillName.Init($"Attacking Player...", Color.white);
             yield return new WaitForSeconds(0.5f);
 
@@ -263,6 +310,10 @@ namespace MaskMYDrama.Core
             {
                 EndCombatInfoHolder playerIsNotAlive = Instantiate(endCombatInfoHolder, CombatInfoPool.transform);
                 playerIsNotAlive.Init($"You Lose.....", Color.red);
+
+                go_next_level.gameObject.SetActive(false);
+                re_try_current.gameObject.SetActive(true);
+                canGoNextRound = false;
 
                 currentState = CombatState.Defeat;
                 OnStateChanged?.Invoke(currentState);

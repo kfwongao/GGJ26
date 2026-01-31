@@ -39,6 +39,7 @@ namespace MaskMYDrama.UI
         [Header("Card Hand UI")]
         public Transform cardHandParent;
         public GameObject cardUIPrefab;
+        public ArcCardLayout arcCardLayout;
         
         [Header("Bottom UI")]
         public Button endTurnButton;
@@ -50,11 +51,32 @@ namespace MaskMYDrama.UI
         public TextMeshProUGUI levelText;
         
         private List<CardUI> cardUIList = new List<CardUI>();
+        private HorizontalLayoutGroup horizontalLayoutGroup;
         
         private void Awake()
         {
             // Subscribe to events early to catch any events that fire during Start()
             SubscribeToEvents();
+            
+            // Setup arc layout if not assigned
+            if (arcCardLayout == null && cardHandParent != null)
+            {
+                arcCardLayout = cardHandParent.GetComponent<ArcCardLayout>();
+                if (arcCardLayout == null)
+                {
+                    arcCardLayout = cardHandParent.gameObject.AddComponent<ArcCardLayout>();
+                }
+            }
+            
+            // Disable horizontal layout group if it exists (arc layout will handle positioning)
+            if (cardHandParent != null)
+            {
+                horizontalLayoutGroup = cardHandParent.GetComponent<HorizontalLayoutGroup>();
+                if (horizontalLayoutGroup != null)
+                {
+                    horizontalLayoutGroup.enabled = false;
+                }
+            }
         }
         
         private void Start()
@@ -168,6 +190,25 @@ namespace MaskMYDrama.UI
                     }
                 }
             }
+            
+            // Update arc layout after cards are created
+            if (arcCardLayout != null)
+            {
+                // Update layout immediately (no animation) for initial positioning
+                // Cards will store their arc positions in their Start() methods
+                StartCoroutine(UpdateArcLayoutDelayed());
+            }
+        }
+        
+        private IEnumerator UpdateArcLayoutDelayed()
+        {
+            // Wait one frame to ensure all cards are instantiated
+            yield return null;
+            if (arcCardLayout != null)
+            {
+                // Set positions immediately for initial layout (no animation)
+                arcCardLayout.UpdateLayout(immediate: true);
+            }
         }
         
         private void OnCardSelected(int handIndex)
@@ -249,12 +290,12 @@ namespace MaskMYDrama.UI
             // Update deck counts
             if (poolCountText != null)
             {
-                poolCountText.text = $"Pool: {deckManager.PoolCount}";
+                poolCountText.text = $"{deckManager.PoolCount}";
             }
             
             if (abandonedCountText != null)
             {
-                abandonedCountText.text = $"Abandoned: {deckManager.AbandonedCount}";
+                abandonedCountText.text = $"{deckManager.AbandonedCount}";
             }
             
             // Update card playability

@@ -145,8 +145,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 1
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
-  m_sharedMaterial: {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 26c30b658e3812d4da93ab84fc7fdfe8, type: 2}
+  m_sharedMaterial: {fileID: 5854881634260427501, guid: 26c30b658e3812d4da93ab84fc7fdfe8, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -279,8 +279,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Card Name
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
-  m_sharedMaterial: {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 26c30b658e3812d4da93ab84fc7fdfe8, type: 2}
+  m_sharedMaterial: {fileID: 5854881634260427501, guid: 26c30b658e3812d4da93ab84fc7fdfe8, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -479,6 +479,19 @@ MonoBehaviour:
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   unplayableColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  selectedColor: {r: 1, g: 0.8, b: 0.2, a: 1}
+  selectedYOffset: 50
+  selectedScale: 1.25
+  hoverScale: 1.1
+  selectionDuration: 0.3
+  selectionEase: 27
+  canvas: {fileID: 0}
+  dragOffset: {x: 0, y: 0}
+  playThresholdY: 0.1
+  cardMaterial: {fileID: 0}
+  uvSpeedPropertyName: _Main_UV
+  normalUVSpeed: {x: 0, y: 0, z: 0, w: 0}
+  selectedUVSpeed: {x: 0.5, y: 0.5, z: 0, w: 0}
 --- !u!1 &8232246232248187946
 GameObject:
   m_ObjectHideFlags: 0
@@ -546,8 +559,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Card Description
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
-  m_sharedMaterial: {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 26c30b658e3812d4da93ab84fc7fdfe8, type: 2}
+  m_sharedMaterial: {fileID: 5854881634260427501, guid: 26c30b658e3812d4da93ab84fc7fdfe8, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
