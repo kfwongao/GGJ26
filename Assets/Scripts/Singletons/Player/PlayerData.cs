@@ -74,6 +74,13 @@ public class PlayerData :Singleton<PlayerData>
     //
     public bool isGameWin = false;
     
+    // Encore (å®‰å¯) tracking - persists across scenes
+    [Header("Encore Status")]
+    [Tooltip("Whether Encore status is active (no damage taken and killed enemy within X rounds)")]
+    public bool isEncoreActive = false;
+    
+    [Tooltip("Number of rounds within which Encore must be achieved (X rounds)")]
+    public int encoreRoundLimit = 3; // Default: must achieve within 3 rounds
 
 
     public Vector3 playerLocation { get; set; }
@@ -339,13 +346,13 @@ public class PlayerData :Singleton<PlayerData>
 
 
 
-        //¼òÌåÖĞÎÄ°æ±¾
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä°æ±¾
         skillDict_Chinese.Clear();
         skillDict_Chinese.Add(SkillType.Skill01_E0, new SkillInfo
         {
-            skillName = "»ù´¡ÔöÒæ",
+            skillName = "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",
             skillLevel = $"Lv.{skill01LV}",
-            skillDesc = $@"Ôö»ù´¡ÊôĞÔ5µã\ncon:+5, atk:+5, def:+5, magic:+5",
+            skillDesc = $@"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½5ï¿½ï¿½\ncon:+5, atk:+5, def:+5, magic:+5",
             skillDamageFormula = "last for 50 s",
             MPConsume = "5",
             CoolDown = "60s",
@@ -356,9 +363,9 @@ public class PlayerData :Singleton<PlayerData>
 
         skillDict_Chinese.Add(SkillType.Skill02_E0, new SkillInfo
         {
-            skillName = "»ù´¡¶¾¹¥",
+            skillName = "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",
             skillLevel = $"Lv.{skill02LV}",
-            skillDesc = $@"(Boss¼¼)¹¥+¶¾ÉË Max:2",
+            skillDesc = $@"(Bossï¿½ï¿½)ï¿½ï¿½+ï¿½ï¿½ï¿½ï¿½ Max:2",
             skillDamageFormula = $"{GetLevelBaseAttack() + 80f * (((atkBasePoint + magicBasePoint) * 1.2f + skillBuffPoints) + (skill02LV / 100f) * (GetLevelBaseAttack()))}",
             MPConsume = $"10(+{skill02LV}*({playerLevel})",
             CoolDown = "5s",
@@ -369,9 +376,9 @@ public class PlayerData :Singleton<PlayerData>
 
         skillDict_Chinese.Add(SkillType.Skill03_E0, new SkillInfo
         {
-            skillName = "»ù´¡·ç±©",
+            skillName = "ï¿½ï¿½ï¿½ï¿½ï¿½ç±©",
             skillLevel = $"Lv.{skill03LV}",
-            skillDesc = $@"·çÊôĞÔÄ§·¨ÉËº¦(·¶Î§)  Max:4",
+            skillDesc = $@"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä§ï¿½ï¿½ï¿½Ëºï¿½(ï¿½ï¿½Î§)  Max:4",
             skillDamageFormula = $"{(int)(80 + (playerLevel + skill03LV) * 0.8 * ((atkBasePoint + skillBuffPoints) * 0.2 + (magicBasePoint + skillBuffPoints) * 0.8) * 0.8f)}~{(int)(80 + (playerLevel + skill03LV) * 0.8 * ((atkBasePoint + skillBuffPoints) * 0.2 + (magicBasePoint + skillBuffPoints) * 0.8) * 1.5f)}",
             MPConsume = $"{20f + (skill03LV - 1) * 2f}",
             CoolDown = "3s",
@@ -382,9 +389,9 @@ public class PlayerData :Singleton<PlayerData>
 
         skillDict_Chinese.Add(SkillType.Skill04_E0, new SkillInfo
         {
-            skillName = "»ù´¡²¨¹¥",
+            skillName = "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",
             skillLevel = $"Lv.{skill04LV}",
-            skillDesc = $@"²¨¹¥, Îï+Ä§ÉË",
+            skillDesc = $@"ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½+Ä§ï¿½ï¿½",
             skillDamageFormula = $"{(int)(60f + (playerLevel + skill04LV) * 0.5f * ((atkBasePoint + skillBuffPoints) * 0.5f + (magicBasePoint + skillBuffPoints) * 0.5f))}",
             MPConsume = $"{10f + (skill04LV - 1) * 1f}",
             CoolDown = "1s",
@@ -397,9 +404,9 @@ public class PlayerData :Singleton<PlayerData>
         //
         skillDict_Chinese.Add(SkillType.Skill01_E1, new SkillInfo
         {
-            skillName = "ÖĞµÈÔöÒæ",
+            skillName = "ï¿½Ğµï¿½ï¿½ï¿½ï¿½ï¿½",
             skillLevel = $"Lv.{skill01LV}",
-            skillDesc = $@"Ôö»ù´¡ÊôĞÔ10µã\ncon:+10, atk:+10, def:+10, magic:+10",
+            skillDesc = $@"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½10ï¿½ï¿½\ncon:+10, atk:+10, def:+10, magic:+10",
             skillDamageFormula = "last for 50 s",
             MPConsume = "10",
             CoolDown = "60s",
@@ -410,9 +417,9 @@ public class PlayerData :Singleton<PlayerData>
 
         skillDict_Chinese.Add(SkillType.Skill02_E1, new SkillInfo
         {
-            skillName = "ÖĞµÈ¶¾¹¥",
+            skillName = "ï¿½ĞµÈ¶ï¿½ï¿½ï¿½",
             skillLevel = $"Lv.{skill02LV}",
-            skillDesc = $@"(Boss¼¼)¹¥+¶¾ÉË Max:6",
+            skillDesc = $@"(Bossï¿½ï¿½)ï¿½ï¿½+ï¿½ï¿½ï¿½ï¿½ Max:6",
             skillDamageFormula = $"{GetLevelBaseAttack() + 80f * (((atkBasePoint + magicBasePoint) * 1.2f + skillBuffPoints) + (skill02LV / 100f) * (GetLevelBaseAttack()))}",
             MPConsume = $"10(+{skill02LV}*({playerLevel})",
             CoolDown = "5s",
@@ -423,9 +430,9 @@ public class PlayerData :Singleton<PlayerData>
 
         skillDict_Chinese.Add(SkillType.Skill03_E1, new SkillInfo
         {
-            skillName = "ÖĞµÈ·ç±©",
+            skillName = "ï¿½ĞµÈ·ç±©",
             skillLevel = $"Lv.{skill03LV}",
-            skillDesc = $@"·çÊôĞÔÄ§·¨ÉËº¦(·¶Î§)  Max:8",
+            skillDesc = $@"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä§ï¿½ï¿½ï¿½Ëºï¿½(ï¿½ï¿½Î§)  Max:8",
             skillDamageFormula = $"{(int)(80 + (playerLevel + skill03LV) * 0.8 * ((atkBasePoint + skillBuffPoints) * 0.2 + (magicBasePoint + skillBuffPoints) * 0.8) * 0.8f)}~{(int)(80 + (playerLevel + skill03LV) * 0.8 * ((atkBasePoint + skillBuffPoints) * 0.2 + (magicBasePoint + skillBuffPoints) * 0.8) * 1.5f)}",
             MPConsume = $"{20f + (skill03LV - 1) * 2f}",
             CoolDown = "3s",
@@ -436,9 +443,9 @@ public class PlayerData :Singleton<PlayerData>
 
         skillDict_Chinese.Add(SkillType.Skill04_E1, new SkillInfo
         {
-            skillName = "ÖĞµÈ²¨¹¥",
+            skillName = "ï¿½ĞµÈ²ï¿½ï¿½ï¿½",
             skillLevel = $"Lv.{skill04LV}",
-            skillDesc = $@"²¨¹¥, Îï+Ä§ÉË",
+            skillDesc = $@"ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½+Ä§ï¿½ï¿½",
             skillDamageFormula = $"{(int)(60f + (playerLevel + skill04LV) * 0.5f * ((atkBasePoint + skillBuffPoints) * 0.5f + (magicBasePoint + skillBuffPoints) * 0.5f))}",
             MPConsume = $"{10f + (skill04LV - 1) * 1f}",
             CoolDown = "1s",
@@ -450,9 +457,9 @@ public class PlayerData :Singleton<PlayerData>
         //
         skillDict_Chinese.Add(SkillType.Skill01_E2, new SkillInfo
         {
-            skillName = "Ç¿Ğ§ÔöÒæ",
+            skillName = "Ç¿Ğ§ï¿½ï¿½ï¿½ï¿½",
             skillLevel = $"Lv.{skill01LV}",
-            skillDesc = $@"Ôö»ù´¡ÊôĞÔ20µã + (µÈ¼¶ / 5)",
+            skillDesc = $@"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½20ï¿½ï¿½ + (ï¿½È¼ï¿½ / 5)",
             skillDamageFormula = "last for 50 s",
             MPConsume = "20",
             CoolDown = "60s",
@@ -463,9 +470,9 @@ public class PlayerData :Singleton<PlayerData>
 
         skillDict_Chinese.Add(SkillType.Skill02_E2, new SkillInfo
         {
-            skillName = "Ç¿Ğ§¶¾¹¥",
+            skillName = "Ç¿Ğ§ï¿½ï¿½ï¿½ï¿½",
             skillLevel = $"Lv.{skill02LV}",
-            skillDesc = $@"(Boss¼¼)¹¥+¶¾ÉË Max:15",
+            skillDesc = $@"(Bossï¿½ï¿½)ï¿½ï¿½+ï¿½ï¿½ï¿½ï¿½ Max:15",
             skillDamageFormula = $"{GetLevelBaseAttack() + 80f * (((atkBasePoint + magicBasePoint) * 1.2f + skillBuffPoints) + (skill02LV / 100f) * (GetLevelBaseAttack()))}",
             MPConsume = $"10(+{skill02LV}*({playerLevel})",
             CoolDown = "5s",
@@ -476,9 +483,9 @@ public class PlayerData :Singleton<PlayerData>
 
         skillDict_Chinese.Add(SkillType.Skill03_E2, new SkillInfo
         {
-            skillName = "Ç¿Ğ§·ç±©",
+            skillName = "Ç¿Ğ§ï¿½ç±©",
             skillLevel = $"Lv.{skill03LV}",
-            skillDesc = $@"·çÊôĞÔÄ§·¨ÉËº¦(·¶Î§)  Max:20",
+            skillDesc = $@"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä§ï¿½ï¿½ï¿½Ëºï¿½(ï¿½ï¿½Î§)  Max:20",
             skillDamageFormula = $"{(int)(80 + (playerLevel + skill03LV) * 0.8 * ((atkBasePoint + skillBuffPoints) * 0.2 + (magicBasePoint + skillBuffPoints) * 0.8) * 0.8f)}~{(int)(80 + (playerLevel + skill03LV) * 0.8 * ((atkBasePoint + skillBuffPoints) * 0.2 + (magicBasePoint + skillBuffPoints) * 0.8) * 1.5f)}",
             MPConsume = $"{20f + (skill03LV - 1) * 2f}",
             CoolDown = "3s",
@@ -489,9 +496,9 @@ public class PlayerData :Singleton<PlayerData>
 
         skillDict_Chinese.Add(SkillType.Skill04_E2, new SkillInfo
         {
-            skillName = "Ç¿Ğ§²¨¹¥",
+            skillName = "Ç¿Ğ§ï¿½ï¿½ï¿½ï¿½",
             skillLevel = $"Lv.{skill04LV}",
-            skillDesc = $@"²¨¹¥, Îï+Ä§ÉË",
+            skillDesc = $@"ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½+Ä§ï¿½ï¿½",
             skillDamageFormula = $"{(int)(60f + (playerLevel + skill04LV) * 0.5f * ((atkBasePoint + skillBuffPoints) * 0.5f + (magicBasePoint + skillBuffPoints) * 0.5f))}",
             MPConsume = $"{10f + (skill04LV - 1) * 1f}",
             CoolDown = "1s",
@@ -503,9 +510,9 @@ public class PlayerData :Singleton<PlayerData>
         //
         skillDict_Chinese.Add(SkillType.Skill01_E3, new SkillInfo
         {
-            skillName = "¼«¶ËÔöÒæ",
+            skillName = "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",
             skillLevel = $"Lv.{skill01LV}",
-            skillDesc = $@"Ôö»ù´¡ÊôĞÔ100µã + (µÈ¼¶ / 4)",
+            skillDesc = $@"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½100ï¿½ï¿½ + (ï¿½È¼ï¿½ / 4)",
             skillDamageFormula = "last for 50 s",
             MPConsume = "100",
             CoolDown = "60s",
@@ -516,9 +523,9 @@ public class PlayerData :Singleton<PlayerData>
 
         skillDict_Chinese.Add(SkillType.Skill02_E3, new SkillInfo
         {
-            skillName = "¼«¶Ë¶¾¹¥",
+            skillName = "ï¿½ï¿½ï¿½Ë¶ï¿½ï¿½ï¿½",
             skillLevel = $"Lv.{skill02LV}",
-            skillDesc = $@"(Boss¼¼)¹¥+¶¾ÉË Max:30",
+            skillDesc = $@"(Bossï¿½ï¿½)ï¿½ï¿½+ï¿½ï¿½ï¿½ï¿½ Max:30",
             skillDamageFormula = $"{GetLevelBaseAttack() + 80f * (((atkBasePoint + magicBasePoint) * 1.2f + skillBuffPoints) + (skill02LV / 100f) * (GetLevelBaseAttack()))}",
             MPConsume = $"10(+{skill02LV}*({playerLevel})",
             CoolDown = "5s",
@@ -529,9 +536,9 @@ public class PlayerData :Singleton<PlayerData>
 
         skillDict_Chinese.Add(SkillType.Skill03_E3, new SkillInfo
         {
-            skillName = "¼«¶Ë·ç±©",
+            skillName = "ï¿½ï¿½ï¿½Ë·ç±©",
             skillLevel = $"Lv.{skill03LV}",
-            skillDesc = $@"·çÊôĞÔÄ§·¨ÉËº¦(·¶Î§)  Max:40",
+            skillDesc = $@"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä§ï¿½ï¿½ï¿½Ëºï¿½(ï¿½ï¿½Î§)  Max:40",
             skillDamageFormula = $"{(int)(80 + (playerLevel + skill03LV) * 0.8 * ((atkBasePoint + skillBuffPoints) * 0.2 + (magicBasePoint + skillBuffPoints) * 0.8) * 0.8f)}~{(int)(80 + (playerLevel + skill03LV) * 0.8 * ((atkBasePoint + skillBuffPoints) * 0.2 + (magicBasePoint + skillBuffPoints) * 0.8) * 1.5f)}",
             MPConsume = $"{20f + (skill03LV - 1) * 2f}",
             CoolDown = "3s",
@@ -542,9 +549,9 @@ public class PlayerData :Singleton<PlayerData>
 
         skillDict_Chinese.Add(SkillType.Skill04_E3, new SkillInfo
         {
-            skillName = "¼«¶Ë²¨¹¥",
+            skillName = "ï¿½ï¿½ï¿½Ë²ï¿½ï¿½ï¿½",
             skillLevel = $"Lv.{skill04LV}",
-            skillDesc = $@"²¨¹¥, Îï+Ä§ÉË",
+            skillDesc = $@"ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½+Ä§ï¿½ï¿½",
             skillDamageFormula = $"{(int)(60f + (playerLevel + skill04LV) * 0.5f * ((atkBasePoint + skillBuffPoints) * 0.5f + (magicBasePoint + skillBuffPoints) * 0.5f))}",
             MPConsume = $"{10f + (skill04LV - 1) * 1f}",
             CoolDown = "1s",

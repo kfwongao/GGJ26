@@ -244,6 +244,28 @@ namespace MaskMYDrama.Core
         {
             return 5; // Default hand size as per CSV
         }
+        
+        /// <summary>
+        /// Get a random card from the discard pile (abandoned pile).
+        /// Used for Encore action: Copy from discard pile.
+        /// </summary>
+        /// <returns>Random CardInstance from discard pile, or null if discard pile is empty</returns>
+        public CardInstance GetRandomCardFromDiscardPile()
+        {
+            if (abandonedPile == null || abandonedPile.Count == 0)
+                return null;
+            
+            int randomIndex = Random.Range(0, abandonedPile.Count);
+            return abandonedPile[randomIndex];
+        }
+        
+        /// <summary>
+        /// Get the discard pile (abandoned pile) for external access.
+        /// </summary>
+        public List<CardInstance> GetDiscardPile()
+        {
+            return abandonedPile;
+        }
     }
 }
 

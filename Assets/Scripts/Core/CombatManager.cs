@@ -5,6 +5,7 @@ using MaskMYDrama.Effects;
 using MaskMYDrama.UI;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using static Cinemachine.DocumentationSortingAttribute;
@@ -48,6 +49,7 @@ namespace MaskMYDrama.Core
         [Header("Managers")]
         public DeckManager deckManager;
         public CardEffectExecutor effectExecutor;
+        public CardDatabase cardDatabase;
         
         [Header("Roguelike Selection")]
         [Tooltip("Card selection UI for roguelike card selection between levels")]
@@ -78,7 +80,16 @@ namespace MaskMYDrama.Core
         public bool canGoNextRound = true;
         public Button go_next_level;
         public Button re_try_current;
-
+        
+        [Header("Encore System")]
+        [Tooltip("Encore card actions for selection (3 actions)")]
+        public EncoreCardAction[] encoreCardActions = new EncoreCardAction[3];
+        
+        // Encore tracking variables
+        private int combatRoundCount = 0;
+        private int playerInitialHealth = 0;
+        private int totalDamageTaken = 0;
+        private bool enemyKilled = false;
 
         private void Start()
         {
@@ -109,8 +120,44 @@ namespace MaskMYDrama.Core
         
         public void StartCombat()
         {
+            // Reset Encore tracking
+            combatRoundCount = 0;
+            playerInitialHealth = player.currentHealth;
+            totalDamageTaken = 0;
+            enemyKilled = false;
+            
+            // Draw one roguelike card from card pool when entering a level (if not first level)
+            DrawRoguelikeCardOnLevelStart();
+            
             currentState = CombatState.PlayerTurn;
             StartPlayerTurn();
+        }
+        
+        /// <summary>
+        /// Draws one roguelike card from card pool and adds it to draw pile when entering a level.
+        /// This happens in subsequent levels (not the first level).
+        /// </summary>
+        private void DrawRoguelikeCardOnLevelStart()
+        {
+            // Check if this is not the first level
+            string[] splitStr = MapsDataSingleton.Instance.MapName.Split('_');
+            if (splitStr.Length > 1)
+            {
+                int level = int.Parse(splitStr[1]);
+                
+                // Only draw roguelike card if not first level (level > 1)
+                if (level > 1 && cardDatabase != null && deckManager != null)
+                {
+                    // Get one random card from roguelike pool
+                    List<Card> randomCards = cardDatabase.GetRandomCards(1);
+                    if (randomCards.Count > 0)
+                    {
+                        // Add to draw pile (card pool)
+                        deckManager.AddCardToPool(randomCards[0]);
+                        Debug.Log($"Level {level}: Added roguelike card {randomCards[0].cardName} to draw pile");
+                    }
+                }
+            }
         }
         
         public void StartPlayerTurn()
@@ -118,6 +165,10 @@ namespace MaskMYDrama.Core
             currentState = CombatState.PlayerTurn;
             player.ResetTurn();
             deckManager.DrawHand();
+            
+            // Increment round count at start of player turn
+            combatRoundCount++;
+            
             OnPlayerTurnStart?.Invoke();
             OnStateChanged?.Invoke(currentState);
         }
@@ -246,6 +297,11 @@ namespace MaskMYDrama.Core
         {
             if (!enemy.IsAlive())
             {
+                enemyKilled = true;
+                
+                // Check Encore condition: no damage taken and killed enemy within X rounds
+                CheckEncoreCondition();
+                
                 EndCombatInfoHolder playerIsNotAlive = Instantiate(endCombatInfoHolder, CombatInfoPool.transform);
                 playerIsNotAlive.Init($"下关更精彩,惊喜彩蛋", Color.yellow);
 
@@ -258,20 +314,58 @@ namespace MaskMYDrama.Core
                 canGoNextRound = true;
             }
         }
+        
+        /// <summary>
+        /// Checks if Encore condition is met: no damage taken and killed enemy within X rounds
+        /// </summary>
+        private void CheckEncoreCondition()
+        {
+            if (enemyKilled && player.IsAlive())
+            {
+                // Check if no damage was taken (current health equals or exceeds initial health)
+                // Note: We track damage taken separately in case health is restored
+                bool noDamageTaken = (totalDamageTaken == 0) || (player.currentHealth >= playerInitialHealth);
+                
+                // Check if killed within round limit
+                bool withinRoundLimit = combatRoundCount <= PlayerData.Instance.encoreRoundLimit;
+                
+                if (noDamageTaken && withinRoundLimit)
+                {
+                    PlayerData.Instance.isEncoreActive = true;
+                    Debug.Log($"Encore achieved! No damage taken in {combatRoundCount} rounds.");
+                }
+            }
+        }
 
         /// <summary>
-        /// Version 2.0: Go to next level with roguelike card selection.
-        /// Shows card selection UI, player picks one card, then proceeds to next level.
+        /// Version 2.0: Go to next level with roguelike card selection or Encore card selection.
+        /// If Encore is active and not final level, show Encore card selection.
+        /// Otherwise, show normal roguelike card selection.
         /// </summary>
         public void Go_Next_Level()
         {
             // Hide the button first
             go_next_level.gameObject.SetActive(false);
             
-            // Show roguelike card selection
-            if (cardSelectionUI != null)
+            // Check if it's the final level
+            string[] splitStr = MapsDataSingleton.Instance.MapName.Split('_');
+            bool isFinalLevel = false;
+            if (splitStr.Length > 1)
             {
-                // Subscribe to selection event
+                int level = int.Parse(splitStr[1]);
+                isFinalLevel = (level >= 4); // Level 4 is final level
+            }
+            
+            // If Encore is active and not final level, show Encore card selection
+            if (PlayerData.Instance.isEncoreActive && !isFinalLevel && cardSelectionUI != null)
+            {
+                // Show Encore card selection
+                cardSelectionUI.OnEncoreCardActionSelected += OnEncoreCardActionSelected;
+                cardSelectionUI.ShowEncoreCardSelection(encoreCardActions);
+            }
+            else if (cardSelectionUI != null)
+            {
+                // Show normal roguelike card selection
                 cardSelectionUI.OnCardSelected += OnRoguelikeCardSelected;
                 cardSelectionUI.ShowCardSelection();
             }
@@ -307,8 +401,80 @@ namespace MaskMYDrama.Core
                 cardSelectionUI.OnCardSelected -= OnRoguelikeCardSelected;
             }
             
+            // Reset Encore status after using it
+            PlayerData.Instance.isEncoreActive = false;
+            
             // Proceed to next level
             ProceedToNextLevel();
+        }
+        
+        /// <summary>
+        /// Called when player selects an Encore card action.
+        /// </summary>
+        private void OnEncoreCardActionSelected(EncoreCardAction selectedAction)
+        {
+            if (selectedAction != null && deckManager != null)
+            {
+                // Execute the selected Encore action
+                ExecuteEncoreAction(selectedAction);
+                
+                // Show feedback
+                if (CombatInfoPool != null && combatInfoHolder != null)
+                {
+                    CombatInfoHolder feedback = Instantiate(combatInfoHolder, CombatInfoPool.transform);
+                    feedback.Init($"Encore: {selectedAction.GetActionName()}!", Color.yellow);
+                }
+            }
+            
+            // Unsubscribe from event
+            if (cardSelectionUI != null)
+            {
+                cardSelectionUI.OnEncoreCardActionSelected -= OnEncoreCardActionSelected;
+            }
+            
+            // Reset Encore status after using it
+            PlayerData.Instance.isEncoreActive = false;
+            
+            // Proceed to next level
+            ProceedToNextLevel();
+        }
+        
+        /// <summary>
+        /// Executes the selected Encore action.
+        /// </summary>
+        private void ExecuteEncoreAction(EncoreCardAction action)
+        {
+            switch (action.actionType)
+            {
+                case EncoreActionType.AddRandomNewCard:
+                    // Randomly add 1 new card to draw pile
+                    if (cardDatabase != null)
+                    {
+                        List<Card> randomCards = cardDatabase.GetRandomCards(1);
+                        if (randomCards.Count > 0)
+                        {
+                            deckManager.AddCardToPool(randomCards[0]);
+                            Debug.Log($"Encore: Added random card {randomCards[0].cardName} to draw pile");
+                        }
+                    }
+                    break;
+                    
+                case EncoreActionType.ShuffleDrawPile:
+                    // Shuffle entire draw pile
+                    deckManager.ShufflePool();
+                    Debug.Log("Encore: Shuffled entire draw pile");
+                    break;
+                    
+                case EncoreActionType.CopyFromDiscardPile:
+                    // Add a copy of a random card from discard pile to draw pile
+                    CardInstance randomDiscardCard = deckManager.GetRandomCardFromDiscardPile();
+                    if (randomDiscardCard != null)
+                    {
+                        deckManager.AddCardToPool(randomDiscardCard.cardData);
+                        Debug.Log($"Encore: Copied {randomDiscardCard.cardData.cardName} from discard pile to draw pile");
+                    }
+                    break;
+            }
         }
         
         /// <summary>
@@ -396,6 +562,10 @@ namespace MaskMYDrama.Core
             
             // Enemy attacks
             int damageVal = enemy.ExecuteAttack(player);
+            
+            // Track damage taken for Encore checking
+            int actualDamage = playerInitialHealth - player.currentHealth;
+            totalDamageTaken = actualDamage;
 
             // Play attack anim for enemy
 

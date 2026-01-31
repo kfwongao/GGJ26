@@ -68,6 +68,9 @@ public class initSceneManager : MonoSingleton<initSceneManager>
     // Start is called before the first frame update
     void Start()
     {
+        // 必須先關閉垂直同步 (VSync)，否則 targetFrameRate 會被忽略
+        QualitySettings.vSyncCount = 0;
+        // 設定目標幀率，例如 60 FPS
         Application.targetFrameRate = 60;
         GameSettingDataSingleton.Instance.LoadData();
         //LocalizationSettings.SelectedLocale 
