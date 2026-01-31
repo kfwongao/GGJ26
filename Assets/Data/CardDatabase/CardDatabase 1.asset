@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 52518a7e0371a4b4a845089227537d75, type: 3}
-  m_Name: CardDatabase
+  m_Name: CardDatabase 1
   m_EditorClassIdentifier: 
   startingCards:
   - {fileID: 11400000, guid: bcae05bc87d9d5542a7bc424c2c8aaf1, type: 2}
-  - {fileID: 11400000, guid: bcae05bc87d9d5542a7bc424c2c8aaf1, type: 2}
-  - {fileID: 11400000, guid: bcae05bc87d9d5542a7bc424c2c8aaf1, type: 2}
+  - {fileID: 11400000, guid: 73a9cc21994cbe04781ead7711ee4a1b, type: 2}
   - {fileID: 11400000, guid: 701e78c3cc1e9e141b20c1d3bc43bea6, type: 2}
-  - {fileID: 11400000, guid: 701e78c3cc1e9e141b20c1d3bc43bea6, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}
   roguelikePoolCards:
-  - {fileID: 11400000, guid: 95e9c2086d8110d4aa9ef83296a0cc94, type: 2}
-  - {fileID: 11400000, guid: bfa8864796c42354bbeb2b0cf73dc1cf, type: 2}
-  - {fileID: 11400000, guid: b698b22d82c0a8243bfca645742982dc, type: 2}
+  - {fileID: 11400000, guid: ac297e9d58959ee459011b7d27bab2a0, type: 2}
+  - {fileID: 11400000, guid: fbc241cac894fab45b6641aec514ab15, type: 2}
+  - {fileID: 11400000, guid: f90d4f2441811134182f786d51ead3dc, type: 2}
   allCards:
   - {fileID: 11400000, guid: bcae05bc87d9d5542a7bc424c2c8aaf1, type: 2}
   - {fileID: 11400000, guid: 73a9cc21994cbe04781ead7711ee4a1b, type: 2}

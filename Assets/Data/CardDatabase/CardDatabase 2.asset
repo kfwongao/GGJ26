@@ -10,18 +10,29 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 52518a7e0371a4b4a845089227537d75, type: 3}
-  m_Name: CardDatabase
+  m_Name: CardDatabase 2
   m_EditorClassIdentifier: 
   startingCards:
-  - {fileID: 11400000, guid: bcae05bc87d9d5542a7bc424c2c8aaf1, type: 2}
-  - {fileID: 11400000, guid: bcae05bc87d9d5542a7bc424c2c8aaf1, type: 2}
-  - {fileID: 11400000, guid: bcae05bc87d9d5542a7bc424c2c8aaf1, type: 2}
-  - {fileID: 11400000, guid: 701e78c3cc1e9e141b20c1d3bc43bea6, type: 2}
+  - {fileID: 11400000, guid: cda904891433c5a45b5aec076d1c85f2, type: 2}
+  - {fileID: 11400000, guid: 18f3289a4b84b824d90efb9cec6a218a, type: 2}
+  - {fileID: 11400000, guid: 3c938515307324c43b7a5672e84804a9, type: 2}
+  - {fileID: 11400000, guid: 73a9cc21994cbe04781ead7711ee4a1b, type: 2}
   - {fileID: 11400000, guid: 701e78c3cc1e9e141b20c1d3bc43bea6, type: 2}
   roguelikePoolCards:
   - {fileID: 11400000, guid: 95e9c2086d8110d4aa9ef83296a0cc94, type: 2}
-  - {fileID: 11400000, guid: bfa8864796c42354bbeb2b0cf73dc1cf, type: 2}
+  - {fileID: 11400000, guid: f90d4f2441811134182f786d51ead3dc, type: 2}
+  - {fileID: 11400000, guid: cf1cf23a0f14449428e92a81036f2c4b, type: 2}
+  - {fileID: 11400000, guid: 78cc6159b573d284b8e6775722f126ad, type: 2}
+  - {fileID: 11400000, guid: fbc241cac894fab45b6641aec514ab15, type: 2}
+  - {fileID: 11400000, guid: ac297e9d58959ee459011b7d27bab2a0, type: 2}
+  - {fileID: 11400000, guid: 204be72ead82a4f44873576d3be9d3c5, type: 2}
+  - {fileID: 11400000, guid: 30fc82198698d95439eccb99f15fd552, type: 2}
+  - {fileID: 11400000, guid: 8ab05ec3a15eb9945af2f23ffd8c2afe, type: 2}
+  - {fileID: 11400000, guid: 367c8993dfd1b6f42b13786882b0e6cf, type: 2}
   - {fileID: 11400000, guid: b698b22d82c0a8243bfca645742982dc, type: 2}
+  - {fileID: 11400000, guid: ac0b3b6a59a37ab41b84399cb3ead350, type: 2}
+  - {fileID: 11400000, guid: 0c3bcea16ac655643a19da992dfa7429, type: 2}
+  - {fileID: 11400000, guid: ce3f610065da2624b902ee0a23ea07cf, type: 2}
   allCards:
   - {fileID: 11400000, guid: bcae05bc87d9d5542a7bc424c2c8aaf1, type: 2}
   - {fileID: 11400000, guid: 73a9cc21994cbe04781ead7711ee4a1b, type: 2}

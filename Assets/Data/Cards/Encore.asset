@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aa82c25dcad893f4a8bfa89b60ac9575, type: 3}
-  m_Name: Attack_Basic
+  m_Name: Encore
   m_EditorClassIdentifier: 
-  cardName: "\u57FA\u7840\u653B\u51FB"
-  description: "\u9020\u62106\u70B9\u4F24\u5BB3"
+  cardName: 
+  description: 
   cardType: 0
   rarity: 0
   energyCost: 0
-  attackValue: 6
+  attackValue: 0
   defenceValue: 0
   strengthValue: 0
   isExhaust: 0

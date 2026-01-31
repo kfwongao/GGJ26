@@ -1858,7 +1858,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  cardDatabase: {fileID: 11400000, guid: 51f5fd42ef5211a42bd5dcc2488dc714, type: 2}
+  cardDatabase: {fileID: 11400000, guid: 505325bcd77fdbb43a031e2d0b35b7d7, type: 2}
   cardDatabaseList: {fileID: 11400000, guid: 81f88e693f891c34d9ac42f4a86c5594, type: 2}
 --- !u!114 &493661681
 MonoBehaviour:
@@ -1876,7 +1876,7 @@ MonoBehaviour:
   enemy: {fileID: 978641532}
   deckManager: {fileID: 493661680}
   effectExecutor: {fileID: 0}
-  cardDatabase: {fileID: 11400000, guid: 51f5fd42ef5211a42bd5dcc2488dc714, type: 2}
+  cardDatabase: {fileID: 11400000, guid: 505325bcd77fdbb43a031e2d0b35b7d7, type: 2}
   cardDatabaseList: {fileID: 11400000, guid: 81f88e693f891c34d9ac42f4a86c5594, type: 2}
   cardSelectionUI: {fileID: 1330212692}
   EnemySpawnGameObjectPool: {fileID: 1290264123}
@@ -3119,7 +3119,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58c6578f5c9402944a6d70fd2f7e4ca5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 14
+  maxHealth: 25
   currentHealth: 0
   currentDefence: 0
   attackPower: 0
@@ -4379,7 +4379,7 @@ MonoBehaviour:
   selectedCardScale: 1.2
   selectionAnimationDuration: 0.3
   deckManager: {fileID: 493661680}
-  cardDatabase: {fileID: 11400000, guid: 51f5fd42ef5211a42bd5dcc2488dc714, type: 2}
+  cardDatabase: {fileID: 11400000, guid: 505325bcd77fdbb43a031e2d0b35b7d7, type: 2}
 --- !u!1 &1343069035
 GameObject:
   m_ObjectHideFlags: 0

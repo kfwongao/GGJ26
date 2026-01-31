@@ -1858,7 +1858,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  cardDatabase: {fileID: 11400000, guid: 031dcf3bf1fe5f44e9bfeaf6de96b832, type: 2}
+  cardDatabase: {fileID: 11400000, guid: 586e682b826b78e409e3983e8f637cf5, type: 2}
   cardDatabaseList: {fileID: 11400000, guid: 81f88e693f891c34d9ac42f4a86c5594, type: 2}
 --- !u!114 &493661681
 MonoBehaviour:
@@ -1876,7 +1876,7 @@ MonoBehaviour:
   enemy: {fileID: 978641532}
   deckManager: {fileID: 493661680}
   effectExecutor: {fileID: 0}
-  cardDatabase: {fileID: 11400000, guid: 031dcf3bf1fe5f44e9bfeaf6de96b832, type: 2}
+  cardDatabase: {fileID: 11400000, guid: 586e682b826b78e409e3983e8f637cf5, type: 2}
   cardDatabaseList: {fileID: 11400000, guid: 81f88e693f891c34d9ac42f4a86c5594, type: 2}
   cardSelectionUI: {fileID: 1330212692}
   EnemySpawnGameObjectPool: {fileID: 1290264123}
@@ -3119,12 +3119,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58c6578f5c9402944a6d70fd2f7e4ca5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 1
+  maxHealth: 15
   currentHealth: 0
   currentDefence: 0
   attackPower: 0
   enemyName: 
-  baseAttackDamage: 10
+  baseAttackDamage: 5
   attackMultiplier: 1
 --- !u!114 &978641533
 MonoBehaviour:
@@ -4379,7 +4379,7 @@ MonoBehaviour:
   selectedCardScale: 1.2
   selectionAnimationDuration: 0.3
   deckManager: {fileID: 493661680}
-  cardDatabase: {fileID: 11400000, guid: 031dcf3bf1fe5f44e9bfeaf6de96b832, type: 2}
+  cardDatabase: {fileID: 11400000, guid: 586e682b826b78e409e3983e8f637cf5, type: 2}
 --- !u!1 &1343069035
 GameObject:
   m_ObjectHideFlags: 0
@@ -5470,6 +5470,10 @@ MonoBehaviour:
   abandonedCountText: {fileID: 489238597}
   playerNameText: {fileID: 1304532028}
   levelText: {fileID: 682581381}
+  playerSprite: {fileID: 0}
+  enemySprite: {fileID: 0}
+  highlightColor: {r: 1, g: 1, b: 0.5, a: 1}
+  highlightDuration: 0.3
 --- !u!1 &1765287812
 GameObject:
   m_ObjectHideFlags: 0
