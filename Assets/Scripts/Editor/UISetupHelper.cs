@@ -278,7 +278,7 @@ namespace MaskMYDrama.Editor
             // Add HealthBar component
             HealthBar healthBar = healthContainer.AddComponent<HealthBar>();
             healthBar.healthSlider = slider;
-            healthBar.healthText = healthTextComp;
+            healthBar.maxhealthText = healthTextComp;
         }
         
         private static void CreateCombatArea(GameObject parent)
@@ -409,7 +409,7 @@ namespace MaskMYDrama.Editor
             // Add HealthBar component
             HealthBar enemyHealthBar = enemyHealthContainer.AddComponent<HealthBar>();
             enemyHealthBar.healthSlider = enemySliderComp;
-            enemyHealthBar.healthText = enemyHealthTextComp;
+            enemyHealthBar.maxhealthText = enemyHealthTextComp;
         }
         
         private static void CreateCardHand(GameObject parent)

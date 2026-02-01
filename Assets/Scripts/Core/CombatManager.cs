@@ -92,6 +92,18 @@ namespace MaskMYDrama.Core
         private int totalDamageTaken = 0;
         private bool enemyKilled = false;
 
+        public AudioSource audioSrc;
+
+        public AudioClip audioClip_attack;
+        public AudioClip audioClip_booking;
+        public AudioClip audioClip_cheer;
+        public AudioClip audioClip_tapping_the_ground;
+        public AudioClip audioClip_enqure;
+        public AudioClip audioClip_slide_card;
+        public AudioClip audioClip_stage_battle;
+
+        public GameObject endGO;
+
         private void Start()
         {
             ObjectPool = new Dictionary<string, List<GameObject>>();
@@ -103,6 +115,11 @@ namespace MaskMYDrama.Core
             {
                 int level = int.Parse(splitStr[1]);
                 
+            }
+
+            if(endGO != null)
+            {
+                endGO.SetActive(false);
             }
 
             // Initialize effect executor if not assigned
@@ -282,6 +299,11 @@ namespace MaskMYDrama.Core
 
                     DamageInfoHolder holder = Instantiate(damageInfoHolder, EnemySpawnGameObjectPool.transform);
                     holder.Init($"-{attackDamage}", Color.red);
+
+                    if(audioSrc != null)
+                    {
+                        audioSrc.PlayOneShot(audioClip_attack);
+                    }
                     break;
                     
                 case CardType.Defence:
@@ -295,6 +317,11 @@ namespace MaskMYDrama.Core
                     defence.Init($"+{card.GetDefenceValue()}", Color.yellow);
 
                     // Play Spell skill anim, display card skill name at player holder, play incease value at player holder
+
+                    if (audioSrc != null)
+                    {
+                        audioSrc.PlayOneShot(audioClip_booking);
+                    }
                     break;
                     
                 case CardType.Strength:
@@ -308,12 +335,22 @@ namespace MaskMYDrama.Core
                     powering.Init($"+{card.cardData.strengthValue}", Color.cyan);
 
                     // Play Spell skill anim, display card skill name at player holder, play incease value at player holder
+
+                    if (audioSrc != null)
+                    {
+                        audioSrc.PlayOneShot(audioClip_tapping_the_ground);
+                    }
                     break;
                     
                 case CardType.Function:
                     // Special function cards - draw card effects are handled after ApplyCardEffects
                     CombatInfoHolder functionCardName = Instantiate(combatInfoHolder, CombatInfoPool.transform);
                     functionCardName.Init($"Using {card.cardData.cardName}...", Color.white);
+
+                    if (audioSrc != null)
+                    {
+                        audioSrc.PlayOneShot(audioClip_enqure);
+                    }
                     break;
             }
             
@@ -326,12 +363,17 @@ namespace MaskMYDrama.Core
             if (!enemy.IsAlive())
             {
                 enemyKilled = true;
-                
+
+                if (audioSrc != null)
+                {
+                    audioSrc.PlayOneShot(audioClip_cheer);
+                }
+
                 // Check Encore condition: no damage taken and killed enemy within X rounds
                 CheckEncoreCondition();
                 
                 EndCombatInfoHolder playerIsNotAlive = Instantiate(endCombatInfoHolder, CombatInfoPool.transform);
-                playerIsNotAlive.Init($"下关更精彩,惊喜彩蛋", Color.yellow);
+                playerIsNotAlive.Init($"Please choose next level to continue...", Color.yellow);
 
                 currentState = CombatState.Victory;
                 OnStateChanged?.Invoke(currentState);
@@ -361,6 +403,11 @@ namespace MaskMYDrama.Core
                 {
                     PlayerData.Instance.isEncoreActive = true;
                     Debug.Log($"Encore achieved! No damage taken in {combatRoundCount} rounds.");
+
+                    if (audioSrc != null)
+                    {
+                        audioSrc.PlayOneShot(audioClip_enqure);
+                    }
                 }
             }
         }
@@ -460,7 +507,12 @@ namespace MaskMYDrama.Core
             
             // Reset Encore status after using it
             PlayerData.Instance.isEncoreActive = false;
-            
+
+            if (audioSrc != null)
+            {
+                audioSrc.PlayOneShot(audioClip_tapping_the_ground);
+            }
+
             // Proceed to next level
             ProceedToNextLevel();
         }
@@ -488,7 +540,12 @@ namespace MaskMYDrama.Core
             {
                 cardSelectionUI.OnEncoreCardActionSelected -= OnEncoreCardActionSelected;
             }
-            
+
+            if (audioSrc != null)
+            {
+                audioSrc.PlayOneShot(audioClip_tapping_the_ground);
+            }
+
             // Reset Encore status after using it
             PlayerData.Instance.isEncoreActive = false;
             
@@ -570,14 +627,20 @@ namespace MaskMYDrama.Core
                     case 1:
                     case 2:
                     case 3:
+                    case 4:
                         MapsDataSingleton.Instance.MapName = $"level_{level}";
                         MapsDataSingleton.Instance.LocationAreaName = $"level_{level}";
                         initSceneManager.Instance.InitScene($"level_{level}");
 
                         break;
-                    case 4:
+                    case 5:
                         EndCombatInfoHolder endgamemsg = Instantiate(endCombatInfoHolder, CombatInfoPool.transform);
-                        endgamemsg.Init($"你是大赢家，多谢你的努力。祝你有愉快的一天。记得给我们一个赞。", Color.yellow);
+                        endgamemsg.Init($"You Win, Cheer。", Color.yellow);
+
+                        if(endGO != null)
+                        {
+                            endGO.SetActive(true);
+                        }
                         break;
                     default:
                         break;

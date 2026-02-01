@@ -16,8 +16,9 @@ namespace MaskMYDrama.UI
     {
         [Header("UI References")]
         public Slider healthSlider;
-        public TextMeshProUGUI healthText;
-        
+        public TextMeshProUGUI maxhealthText;
+        public TextMeshProUGUI currenthealthText;
+
         private int currentHealth;
         private int maxHealth;
         
@@ -42,9 +43,14 @@ namespace MaskMYDrama.UI
                 healthSlider.value = currentHealth;
             }
             
-            if (healthText != null)
+            if (maxhealthText != null)
             {
-                healthText.text = $"{currentHealth}/{maxHealth}";
+                maxhealthText.text = $"{maxHealth}";
+            }
+
+            if (currenthealthText != null)
+            {
+                currenthealthText.text = $"{currentHealth}";
             }
         }
     }

@@ -85,7 +85,7 @@ namespace MaskMYDrama.Core
         {
             Time.timeScale = 1f;
             currentState = GameState.MainMenu;
-            SceneManager.LoadScene("MainMenu");
+            SceneManager.LoadScene("StartMenu");
         }
         
         public void ExitGame()

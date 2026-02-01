@@ -37,8 +37,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.65000004, y: 0.6464287}
   m_AnchorMax: {x: 0.65000004, y: 0.6464287}
-  m_AnchoredPosition: {x: -23, y: -65}
-  m_SizeDelta: {x: 1390.648, y: 966.256}
+  m_AnchoredPosition: {x: -78, y: -87}
+  m_SizeDelta: {x: 500, y: 700}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1276854552285431199
 CanvasRenderer:
@@ -61,14 +61,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.9, g: 0.9, b: 0.9, a: 1}
+  m_Color: {r: 0.69411767, g: 0.6862745, b: 0.6862745, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 784e955ecaeaf0842bc8c88f42c6148c, type: 3}
+  m_Sprite: {fileID: 838678929, guid: 784e955ecaeaf0842bc8c88f42c6148c, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -267,10 +267,10 @@ MonoBehaviour:
   energyCostText: {fileID: 7646594535047537303}
   cardBackground: {fileID: 1757697875695324923}
   cardTypeIcon: {fileID: 1757697875695324923}
-  normalColor: {r: 1, g: 1, b: 1, a: 1}
-  highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  unplayableColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  selectedColor: {r: 1, g: 0.8, b: 0.2, a: 1}
+  normalColor: {r: 0.6939204, g: 0.6844644, b: 0.6844644, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 1}
+  unplayableColor: {r: 0.7777778, g: 0.7777778, b: 0.7777778, a: 1}
+  selectedColor: {r: 1, g: 1, b: 1, a: 1}
   selectedYOffset: 50
   selectedScale: 1.25
   hoverScale: 1.1
@@ -278,7 +278,7 @@ MonoBehaviour:
   selectionEase: 27
   canvas: {fileID: 0}
   dragOffset: {x: 0, y: 0}
-  playThresholdY: 0.1
+  centerDeadZone: 0.05
   cardMaterial: {fileID: 0}
   uvSpeedPropertyName: _Main_UV
   normalUVSpeed: {x: 0, y: 0, z: 0, w: 0}

@@ -249,6 +249,13 @@ namespace MaskMYDrama.UI
         
         private void OnCardSelected(int handIndex)
         {
+            // If handIndex is -1, it means a card was deselected
+            if (handIndex < 0)
+            {
+                RemoveHighlight();
+                return;
+            }
+            
             // Deselect all other cards when one is selected
             for (int i = 0; i < cardUIList.Count; i++)
             {

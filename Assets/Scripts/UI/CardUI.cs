@@ -13,15 +13,15 @@ namespace MaskMYDrama.UI
     /// Implements card interaction:
     /// - Visual display (name, description, energy cost)
     /// - Hover effects (highlight, scale up)
-    /// - Drag to play: Select on press, drag above center to play
+    /// - Click to select: Card is selected on mouse click and brought to front
+    /// - Drag to play: Drag selected card to left (player) or right (enemy) side of screen center
     /// - Playable/unplayable state visualization
-    /// - Mobile touch support (press/release/drag)
     /// - Graceful selection animations (move up, enlarge, shader effects)
     /// 
     /// Based on CSV: Cards in hand are displayed and clickable.
     /// Player can only play cards if energy >= card cost.
     /// </summary>
-    public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler, IDragHandler, IEndDragHandler
+    public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IDragHandler, IEndDragHandler
     {
         [Header("UI References")]
         public TextMeshProUGUI cardNameText;
@@ -51,10 +51,11 @@ namespace MaskMYDrama.UI
         [Header("Drag Settings")]
         [Tooltip("Canvas reference for screen space calculations (auto-detected if null)")]
         public Canvas canvas;
-        [Tooltip("Offset from cursor/finger position when dragging")]
+        [Tooltip("Offset from cursor position when dragging")]
         public Vector2 dragOffset = Vector2.zero;
-        [Tooltip("Minimum Y position above screen center to trigger play (0.0 = center, 0.5 = top)")]
-        public float playThresholdY = 0.1f;
+        [Tooltip("Dead zone around screen center (0.0 = no dead zone, 0.1 = 10% of screen width)")]
+        [Range(0f, 0.2f)]
+        public float centerDeadZone = 0.05f;
         
         [Header("Shader Settings")]
         [Tooltip("Material with shader that supports UV time speed (optional)")]
@@ -70,7 +71,6 @@ namespace MaskMYDrama.UI
         private int handIndex;
         private bool isPlayable;
         private bool isSelected = false;
-        private bool isPressed = false;
         private bool isDragging = false;
         
         // Store original state
@@ -80,7 +80,6 @@ namespace MaskMYDrama.UI
         private Material instanceMaterial;
         
         // Drag state
-        private Vector3 dragStartPosition;
         private RectTransform rectTransform;
         private Canvas parentCanvas;
         private Transform originalParent;
@@ -213,7 +212,7 @@ namespace MaskMYDrama.UI
             }
             
             isSelected = false;
-            isPressed = false;
+            isDragging = false;
         }
         
         private void UpdateDisplay()
@@ -262,8 +261,8 @@ namespace MaskMYDrama.UI
         
         public void OnPointerEnter(PointerEventData eventData)
         {
-            // Only show hover effect if not selected and not pressed
-            if (!isSelected && !isPressed && isPlayable)
+            // Only show hover effect if not selected and card is playable
+            if (!isSelected && isPlayable)
             {
                 if (cardBackground != null)
                 {
@@ -300,53 +299,30 @@ namespace MaskMYDrama.UI
             }
         }
         
-        public void OnPointerDown(PointerEventData eventData)
-        {
-            // Mobile touch support: handle press down
-            // Only allow selection if card is playable and not already selected
-            // Also check if another card is already selected (prevent multiple selections)
-            if (isPlayable && !isSelected)
-            {
-                isPressed = true;
-                SelectCard();
-                // Notify that this card was selected (this will deselect other cards)
-                OnCardSelected?.Invoke(handIndex);
-            }
-            else if (!isPlayable)
-            {
-                // If card is not playable, don't allow interaction
-                isPressed = false;
-            }
-        }
-        
-        public void OnPointerUp(PointerEventData eventData)
-        {
-            // Mobile touch support: handle release
-            // Only process if this card was actually pressed and is not being dragged
-            if (isPressed && !isDragging && isSelected)
-            {
-                isPressed = false;
-                // If not dragged, just deselect (don't play card)
-                DeselectCard();
-            }
-            else if (!isSelected)
-            {
-                // If card is not selected, make sure pressed state is cleared
-                isPressed = false;
-            }
-        }
-        
         public void OnPointerClick(PointerEventData eventData)
         {
-            // Click no longer immediately plays the card
-            // Card is only played when dragged above screen center
-            // This prevents accidental plays on quick clicks
+            // PC-based card selection: Click to select/deselect card
+            if (!isPlayable)
+                return;
+            
+            if (isSelected)
+            {
+                // If already selected, deselect it
+                DeselectCard();
+                OnCardSelected?.Invoke(-1); // -1 indicates deselection
+            }
+            else
+            {
+                // Select this card and bring it to front
+                SelectCard();
+                OnCardSelected?.Invoke(handIndex);
+            }
         }
         
         public void OnDrag(PointerEventData eventData)
         {
-            // Only allow dragging if this card is selected, playable, and was pressed
-            if (!isSelected || !isPlayable || !isPressed) return;
+            // Only allow dragging if this card is selected and playable
+            if (!isSelected || !isPlayable) return;
             
             isDragging = true;
             
@@ -366,7 +342,7 @@ namespace MaskMYDrama.UI
                 parentCanvas.worldCamera,
                 out worldPoint))
             {
-                // Move card to follow cursor/finger
+                // Move card to follow cursor
                 transform.position = worldPoint;
             }
         }
@@ -377,41 +353,68 @@ namespace MaskMYDrama.UI
             if (!isDragging || !isSelected) return;
             
             isDragging = false;
-            isPressed = false;
             
-            // Check if card is above screen center
-            if (IsCardAboveScreenCenter())
+            // Check if card is dropped in playable area (left or right of center)
+            DropArea dropArea = GetDropArea();
+            if (dropArea != DropArea.None)
             {
-                // Card is above center - play it
-                // Only invoke if this card is actually selected
-                if (isSelected)
-                {
-                    OnCardClicked?.Invoke(handIndex);
-                }
+                // Card is dropped in a valid play area - play it
+                OnCardClicked?.Invoke(handIndex);
             }
             else
             {
-                // Card is below center - return to original position
+                // Card is dropped in invalid area - return to original position
                 DeselectCard();
             }
         }
         
-        private bool IsCardAboveScreenCenter()
+        /// <summary>
+        /// Determines which drop area the card is currently in based on screen position.
+        /// </summary>
+        /// <returns>DropArea enum indicating player area (left), enemy area (right), or none</returns>
+        private DropArea GetDropArea()
         {
             if (parentCanvas == null || rectTransform == null)
-                return false;
+                return DropArea.None;
             
             // Get screen center
-            float screenCenterY = Screen.height * 0.5f;
+            float screenCenterX = Screen.width * 0.5f;
+            float deadZoneWidth = Screen.width * centerDeadZone;
             
             // Convert card world position to screen position
             Vector3 cardScreenPos = RectTransformUtility.WorldToScreenPoint(
                 parentCanvas.worldCamera != null ? parentCanvas.worldCamera : Camera.main,
                 rectTransform.position);
             
-            // Check if card Y position is above screen center (with threshold)
-            float thresholdY = screenCenterY + (Screen.height * playThresholdY);
-            return cardScreenPos.y > thresholdY;
+            // Check if card is in dead zone (center area)
+            float leftBoundary = screenCenterX - deadZoneWidth;
+            float rightBoundary = screenCenterX + deadZoneWidth;
+            
+            if (cardScreenPos.x >= leftBoundary && cardScreenPos.x <= rightBoundary)
+            {
+                // Card is in dead zone (center) - don't play
+                return DropArea.None;
+            }
+            else if (cardScreenPos.x < leftBoundary)
+            {
+                // Card is left of center - player area
+                return DropArea.Player;
+            }
+            else
+            {
+                // Card is right of center - enemy area
+                return DropArea.Enemy;
+            }
+        }
+        
+        /// <summary>
+        /// Enum for drop areas on the screen.
+        /// </summary>
+        private enum DropArea
+        {
+            None,   // Center dead zone or invalid area
+            Player, // Left of center
+            Enemy   // Right of center
         }
         
         private void SelectCard()
@@ -420,16 +423,15 @@ namespace MaskMYDrama.UI
             
             isSelected = true;
             
-            // Store drag start position and parent info
-            dragStartPosition = transform.localPosition;
+            // Store parent info for restoring position later
             originalParent = transform.parent;
             originalSiblingIndex = transform.GetSiblingIndex();
             
-            // Move card to canvas root to allow free dragging (temporarily)
+            // Move card to canvas root to allow free dragging and bring to front (top of deck)
             if (parentCanvas != null)
             {
                 transform.SetParent(parentCanvas.transform, true);
-                transform.SetAsLastSibling(); // Bring to front
+                transform.SetAsLastSibling(); // Bring to front (top of deck)
             }
             
             // Kill any existing animations
@@ -494,7 +496,6 @@ namespace MaskMYDrama.UI
             if (!isSelected) return;
             
             isSelected = false;
-            isPressed = false;
             isDragging = false;
             
             // Kill any existing animations
