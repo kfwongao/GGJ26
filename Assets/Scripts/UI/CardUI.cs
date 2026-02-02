@@ -355,7 +355,8 @@ namespace MaskMYDrama.UI
             isDragging = false;
             
             // Check if card is dropped in playable area (left or right of center)
-            DropArea dropArea = GetDropArea();
+            // Use eventData.position directly to ensure accuracy even after resolution changes
+            DropArea dropArea = GetDropArea(eventData.position);
             if (dropArea != DropArea.None)
             {
                 // Card is dropped in a valid play area - play it
@@ -371,31 +372,24 @@ namespace MaskMYDrama.UI
         /// <summary>
         /// Determines which drop area the card is currently in based on screen position.
         /// </summary>
+        /// <param name="screenPosition">The screen position where the drop occurred (from eventData.position)</param>
         /// <returns>DropArea enum indicating player area (left), enemy area (right), or none</returns>
-        private DropArea GetDropArea()
+        private DropArea GetDropArea(Vector2 screenPosition)
         {
-            if (parentCanvas == null || rectTransform == null)
-                return DropArea.None;
-            
-            // Get screen center
+            // Use current screen dimensions (always up-to-date, even after resolution changes)
             float screenCenterX = Screen.width * 0.5f;
             float deadZoneWidth = Screen.width * centerDeadZone;
             
-            // Convert card world position to screen position
-            Vector3 cardScreenPos = RectTransformUtility.WorldToScreenPoint(
-                parentCanvas.worldCamera != null ? parentCanvas.worldCamera : Camera.main,
-                rectTransform.position);
-            
-            // Check if card is in dead zone (center area)
+            // Check if drop position is in dead zone (center area)
             float leftBoundary = screenCenterX - deadZoneWidth;
             float rightBoundary = screenCenterX + deadZoneWidth;
             
-            if (cardScreenPos.x >= leftBoundary && cardScreenPos.x <= rightBoundary)
+            if (screenPosition.x >= leftBoundary && screenPosition.x <= rightBoundary)
             {
                 // Card is in dead zone (center) - don't play
                 return DropArea.None;
             }
-            else if (cardScreenPos.x < leftBoundary)
+            else if (screenPosition.x < leftBoundary)
             {
                 // Card is left of center - player area
                 return DropArea.Player;
